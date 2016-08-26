@@ -1,0 +1,50 @@
+Fail to reject null hypothesis with p=57.53% confidence that the minDetectTest of regressiosn 1 through 4 are the same
+Fail to reject null hypothesis with p=26.21% confidence that the  minDetectTestof regressions with two channels are the same
+Reject null hypothesis with p=1.06% confidence that the minDetectTest of regressions with two and one channels are the same
+Reject null hypothesis with p=1.78% confidence that the minDetectTest of regressions with a single channel are the same
+Fail to reject null hypothesis with p=97.40% confidence that the minDetectTest a total signal regresion and regresions with all spatial featurs are the same
+Fail to reject null hypothesis with p=13.20% confidence that the  minDetectTest adding lipids to regression of DAPI and CD45 is the same
+Fail to reject null hypothesis with p=55.53% confidence that variances of the minDetectTest for a live cell assay with Bodipy is the same
+Reject null hypothesis with p=0.43% confidence that the minDetectTest of two channel metrics is the same as 1 channel 
+Fail to reject null hypothesis with p=30.95% confidence that the  minDetectTest of three channel metrics is the same as two channels 
+
+Fail to reject null hypothesis with p=81.04% confidence that the fpMinDetectTest of regressiosn 1 through 4 are the same
+Fail to reject null hypothesis with p=60.65% confidence that the  fpMinDetectTestof regressions with two channels are the same
+Fail to reject null hypothesis with p=37.15% confidence that the  fpMinDetectTestof regressions with two and one channels are the same
+Fail to reject null hypothesis with p=26.91% confidence that the fpMinDetectTest of regressions with a single channel are the same
+Fail to reject null hypothesis with p=100.00% confidence that the fpMinDetectTest a total signal regresion and regresions with all spatial featurs are the same
+Fail to reject null hypothesis with p=52.38% confidence that the  fpMinDetectTest adding lipids to regression of DAPI and CD45 is the same
+Fail to reject null hypothesis with p=6.21% confidence that variances of the fpMinDetectTest for a live cell assay with Bodipy is the same
+Fail to reject null hypothesis with p=19.05% confidence that the  fpMinDetectTest of two channel metrics is the same as 1 channel 
+Fail to reject null hypothesis with p=61.69% confidence that the  fpMinDetectTest of three channel metrics is the same as two channels 
+
+Fail to reject null hypothesis with p=35.99% confidence that the sensMinDetectTest of regressiosn 1 through 4 are the same
+Fail to reject null hypothesis with p=8.00% confidence that the  sensMinDetectTestof regressions with two channels are the same
+Fail to reject null hypothesis with p=6.23% confidence that the  sensMinDetectTestof regressions with two and one channels are the same
+Fail to reject null hypothesis with p=31.90% confidence that the sensMinDetectTest of regressions with a single channel are the same
+Fail to reject null hypothesis with p=66.88% confidence that the sensMinDetectTest a total signal regresion and regresions with all spatial featurs are the same
+Reject null hypothesis with p=0.22% confidence that the sensMinDetectTest of adding lipids to regression of DAPI and CD45 is the same
+Reject null hypothesis with p=0.05% confidence that variances of the sensMinDetectTest for the live cell assay with Bodipy is the same
+Fail to reject null hypothesis with p=6.49% confidence that the  sensMinDetectTest of two channel metrics is the same as 1 channel 
+Reject null hypothesis with p=2.60% confidence that the sensMinDetectTest of three channel metrics is the same as two channels 
+
+Fail to reject null hypothesis with p=56.28% confidence that the d_cohen of regressiosn 1 through 4 are the same
+Reject null hypothesis with p=0.26% confidence that the d_cohen of regressions with two channels are the same
+Reject null hypothesis with p=0.01% confidence that the d_cohen of regressions with two and one channels are the same
+Reject null hypothesis with p=0.23% confidence that the d_cohen of regressions with a single channel are the same
+Fail to reject null hypothesis with p=100.00% confidence that the d_cohen a total signal regresion and regresions with all spatial featurs are the same
+Reject null hypothesis with p=4.11% confidence that the d_cohen of adding lipids to regression of DAPI and CD45 is the same
+Fail to reject null hypothesis with p=25.21% confidence that variances of the d_cohen for a live cell assay with Bodipy is the same
+Reject null hypothesis with p=0.22% confidence that the d_cohen of two channel metrics is the same as 1 channel 
+Reject null hypothesis with p=0.22% confidence that the d_cohen of three channel metrics is the same as two channels 
+
+Fail to reject null hypothesis with p=56.14% confidence that the AUCTest of regressiosn 1 through 4 are the same
+Reject null hypothesis with p=0.19% confidence that the AUCTest of regressions with two channels are the same
+Reject null hypothesis with p=0.02% confidence that the AUCTest of regressions with two and one channels are the same
+Reject null hypothesis with p=1.18% confidence that the AUCTest of regressions with a single channel are the same
+Fail to reject null hypothesis with p=93.72% confidence that the AUCTest a total signal regresion and regresions with all spatial featurs are the same
+Fail to reject null hypothesis with p=17.97% confidence that the  AUCTest adding lipids to regression of DAPI and CD45 is the same
+Fail to reject null hypothesis with p=59.47% confidence that variances of the AUCTest for a live cell assay with Bodipy is the same
+Fail to reject null hypothesis with p=48.48% confidence that the  AUCTest of two channel metrics is the same as 1 channel 
+Reject null hypothesis with p=0.22% confidence that the AUCTest of three channel metrics is the same as two channels 
+
