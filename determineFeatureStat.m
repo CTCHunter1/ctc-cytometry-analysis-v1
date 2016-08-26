@@ -1,5 +1,8 @@
 function [FeatStat] = determineFeatureStat(Dp, Dn, Dptest, Dntest, DNACutOff)
-% Created By: G. Futia
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
+
+% Description: Iterates throug the days of data. Data is split into 
 
 if nargin == 0
     % this script is ment to be called by create_manuscript_figures
@@ -18,6 +21,7 @@ channelNames = fieldnames(Dp.Channels);
 features = {'totalSig_dBc', 'radius_m', 'radius_invm', 'M2'};
 reorder = [3, 1, 4, 2];
 
+% initialize the performance variables
 regressionNames = cell(1, length(channelNames)*length(features));
 FeatStat.regressionNames = regressionNames;
 FeatStat.TMinDetect = zeros(1, length(regressionNames));

@@ -1,14 +1,22 @@
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
 
+% Description: Iterates throug the days of data. Data is split into 
+% training-testing subsets for each days worth of data. 
+% For each training testing subset, ROC curves of the individual features
+% are created. Regressions are performed using the training side of each
+% subset and operating point maximizing Ndet is found. Regressiosn are
+% tested with the testing subset ath the previously found operationg point.
+% Performance statistics are found for each of the Training Testing
+% Subsets. 
+% Function depends on :
+% selectAndRegress2.m
+% determineFeatureStat.m
+% determineRegressionStat.m
+% create_manuscript_histograms.m
+% parsave.m
 
-%mainPath = uigetdir(pwd, 'Data Head Level');
-switch get(com.sun.security.auth.module.NTSystem,'DomainSID')
-    % home pc
-    case 'S-1-5-21-185699899-1350093799-3033961589'
-        mainPath = 'C:\Vespucci Repository\Projects\Nuclear Second Moment\Code\Processed Mats\Format for Zenodo';
-        
-    otherwise    
-        mainPath = 'C:\Repository\Projects\Nuclear Second Moment\Code\Processed Mats\Format for Zenodo';
-end
+mainPath = [pwd, filesep, 'Processed Mats', filesep, 'Futia_Zenodo_2016'];
 
 daysToProcess = {'day5', 'day7', 'day8', 'day9', 'day10', 'day12', 'day13', ...
     'day14', 'day15'};
@@ -32,9 +40,8 @@ DNACutoff = 65;
 
 % load the regressions form files
 % otherwise compute them
-bLoad = 1; % 0 for compute 1 for load
-bUsePooledRegs = 0; % the all regression instead of the technical
-% variants
+bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
+bUsePooledRegs = 0; % the all regression instead of the training-testing pairings
 Ndays = length(daysToProcess);
 
 
@@ -42,8 +49,11 @@ WBCDataAll = cell(1, Ndays);
 MCF7DataAll = cell(1, Ndays);
 MixDataAll = cell(1, Ndays);
 
+% This will interate through each day's worth of data
 for ii=1:length(daysToProcess)
     fprintf('Processing %s\n', daysToProcess{ii});    
+    % Figure out the numbe of WBC and MCF7 file in these days
+    
     wbcPath = [mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'WBC', ...
         fsepchar];
     dirResult = dir([wbcPath '*.mat']);    
@@ -58,6 +68,8 @@ for ii=1:length(daysToProcess)
     end    
     
     ND = combineND(wbcData);
+    % save the combined WBC data in the root day path with the day after
+    % the file name
     save([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'wbc_', daysToProcess{ii}, '.mat'], 'ND');
     WBCDataAll{ii}.ND = ND;
     
@@ -75,6 +87,9 @@ for ii=1:length(daysToProcess)
     end
     
     ND = combineND(mcf7Data);
+    
+    % save the combined MCF7 data in the root day path with the after the
+    % file name
     save([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mcf7_', daysToProcess{ii}, '.mat'], 'ND');
     MCF7DataAll{ii}.ND = ND;
    
@@ -93,6 +108,9 @@ for ii=1:length(daysToProcess)
     % group all the mixed data togeteher for one test set
     ND = combineND(mixData);
     mixTest = ND;
+    
+    % save the combined MCF7 data in the root day path with the after the
+    % file name
     save([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mix_', daysToProcess{ii}, '.mat'], 'ND');
     MixDataAll{ii}.ND = ND;
     
@@ -120,6 +138,8 @@ for ii=1:length(daysToProcess)
             wbcTest = combineND(wbcData(1:Nwbcfiles~=jj));            
             mcf7Test = combineND(mcf7Data(1:Nmcf7files~=kk));
             
+            % featsStats is array of performance stats for the features
+            % determineFeatureStats computes these metrics
             featStats{indexFeatStats} = determineFeatureStat(mcf7Train.ND, wbcTrain.ND, ...
                 mcf7Test, wbcTest, DNACutoff);
            
@@ -127,7 +147,7 @@ for ii=1:length(daysToProcess)
             eqnPath = pathToEqns;   
             
             if bUsePooledRegs == 0
-               % compute the regressions on the technical variants
+               % compute the regressions on the training-testing pairs
                % in reg mats we need to create a folder called regvars
                % take the .mat off the wbc & mcf7 file names
                % this will be the name for this folder pairings
@@ -146,6 +166,8 @@ for ii=1:length(daysToProcess)
                % perform features selection and regression on the training
                % data
                if bLoad == 0
+                % this will populate the RegMats directory if it isn't
+                % already populated. 
                 selectAndRegress2([wbcPath wbcFilenames{jj}], [mcf7Path mcf7Filenames{kk}] ,regMatsPath, eqnPath);               
                end
             end
@@ -178,7 +200,6 @@ end
 ND = combineND(WBCDataAll);
 save([mainPath, fsepchar , 'wbcAll', '.mat'], 'ND');
 Dn = ND; % use for histograms
-
 
 % combine all the data and save the mats
 ND = combineND(MCF7DataAll);
@@ -220,10 +241,12 @@ featStatsAll = featStatsAll(~cellfun('isempty', featStatsAll));
 featStatsAllName = featStatsAllName(~cellfun('isempty',featStatsAllName));
 regStatsAll = regStatsAll(~cellfun('isempty',regStatsAll));
 
+% save the performance mats
 save([mainPath, fsepchar, 'featStatsAll.mat'], 'featStatsAll', 'featStatsAllName');
 save([mainPath, fsepchar, 'regStatsAll.mat'], 'regStatsAll', 'featStatsAllName');
 featFullData = createStatsTabAndPlots2(featStatsAll, [mainPath, fsepchar], 'feature', featStatsAllName);
 createStatsTabAndPlots2(regStatsAll, [mainPath, fsepchar], 'regression', featStatsAllName);
+
 figure(6);  
 clf;
 create_manuscript_histograms(Dp, Dn, Dmix, featFullData, DNACutoff, [mainPath, fsepchar]);

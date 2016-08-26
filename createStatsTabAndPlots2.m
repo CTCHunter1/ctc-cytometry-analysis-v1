@@ -1,6 +1,5 @@
-% Crated By: G. Futia
-
-% create stats tabs and plots
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
 
 % this will start by loading the data, biggest part
 
@@ -456,8 +455,8 @@ zspace = linspace(aucZmin, aucZmax);
 fp_no_use = normcdf(zspace);
 sens_no_use = fp_no_use;
 
-aucColormap = load('DensityPlotColorMapFlowDNAGneg.mat');
-thresholdMap = load('DensityPlotColorMapFlowWhiteToRed.mat');
+aucColormap = load('DensityPlotColorMapGray.mat');
+thresholdMap = load('DensityPlotColorMapWhiteToRed.mat');
 %8x2 figure
 % two loops first loop is vertical, second loop is horizontal
 % Nvert = NvertPan;
@@ -509,8 +508,13 @@ for ii=Nvert:-1:1
         % with the avspace parts of this
         axh(regIndex) = axes('position', [ao + ((jj-1)/Nhorz)*avscale, aob+ ((ii-1)/Nvert)*ahscale+avspace*(round((ii)/2)-1), aw, ah]);   
         %cloudPlot(norminv(featuresFullData.fpTrainROC{regIndex}), norminv(featuresFullData.sensTrainROC{regIndex}), [aucZmin aucZmax, aucZmin aucZmax], 0, [100, 100], aucColormap.map);
-        if(bCloudPlot)
+        
+        if bCloudPlot || ~exist('identifiers', 'var')
             cloudPlot({norminv(featuresFullData.(fpFieldName){regIndex}), norminv(featuresFullData.(threshFPFieldName)(:, regIndex))}, {norminv(featuresFullData.(sensFieldName){regIndex}),norminv(featuresFullData.(threshSensFieldName)(:, regIndex))}, [aucZmin aucZmax, aucZmin aucZmax], 0, [200, 200], {aucColormap.map, thresholdMap.map}, {[0, 1], [0, 1]});
+            hold on;
+            plot(norminv(featuresFullData.(threshFPFieldName)(:, regIndex)).', ...
+                 norminv(featuresFullData.(threshSensFieldName)(:, regIndex)).', 'r+', 'MarkerSize', 2);
+            
         else
             plot(norminv(featuresFullData.(fpFieldName){regIndex}).', ...
                 norminv(featuresFullData.(sensFieldName){regIndex}).');
@@ -527,8 +531,8 @@ for ii=Nvert:-1:1
             end
             set(ax, 'Xlim', [aucZmin, aucZmax]);
             set(ax, 'Ylim', [aucZmin, aucZmax]);
-        end        
-        hold on;
+        end
+        
         plot(norminv(fp_no_use), norminv(sens_no_use), 'k--');
         set(axh(regIndex), 'XTick', ticksZ);
         set(axh(regIndex), 'YTick', ticksZ);
@@ -596,9 +600,10 @@ for ii=Nvert:-1:1
             set(axhtick, 'XAxisLocation', 'top');
             set(axhtick, 'Color', 'none');                            
         end
-
+    
+        % if identifiers exist 
         % add the legend 
-        if jj==1 && ii==1
+        if jj==1 && ii==1 && exist('identifiers', 'var')
             h = columnlegend(3, identifiers, 'Orientation', 'Horizontal', 'Location', 'South');
             set(h, 'Position', [.15, -.075, .75, .12]);
         end
@@ -637,11 +642,13 @@ if isfield(featuresFullData, 'dpTestScored')
 end
 
 
-bPeformStatTest = 0;
+bPeformStatTest = 1;
 
 if strcmp(filenameprefix, 'regression') && bPeformStatTest
     PUT = {'minDetectTest', 'fpMinDetectTest', ...
     'sensMinDetectTest', 'd_cohen', 'AUCTest'};
+
+fid = fopen([pathname, 'hypothesis_test_results.txt'], 'w');
     
 for ii=1:length(PUT)
     % test if Reg1_all and 3 feature Regs are equivalent
@@ -652,79 +659,80 @@ for ii=1:length(PUT)
         otherwise        
     end
     
-    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,1:4));
+    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,1:4), [], 'off');
 
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of regressiosn 1 through 4 are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of regressiosn 1 through 4 are the same\n', 100*p, PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the %s of regressiosn 1 through 4 are the same\n', 100*p,PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the %s of regressiosn 1 through 4 are the same\n', 100*p,PUT{ii});
     end
 
     % test if 2 feature Regs are equivalent
-    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,5:7));
+    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,5:7), [], 'off');
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with two channels are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with two channels are the same\n', 100*p, PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the  %sof regressions with two channels are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %sof regressions with two channels are the same\n', 100*p, PUT{ii});
     end
 
     
     % test if 2 &1 feature Regs are equivalent
-    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,5:11));
+    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,5:11), [], 'off');
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with two and one channels are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with two and one channels are the same\n', 100*p, PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the  %sof regressions with two and one channels are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %sof regressions with two and one channels are the same\n', 100*p, PUT{ii});
     end
 
     % test if 1 feature Regs are equivalent
-    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,8:11));
+    [p, atab, stats] = kruskalwallis(featuresFullData.(PUT{ii})(:,8:11), [], 'off');
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with a single channel are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with a single channel are the same\n', 100*p, PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the %s of regressions with a single channel are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the %s of regressions with a single channel are the same\n', 100*p, PUT{ii});
     end
 
     % test if spatial features perform equal sum signal
     p = ranksum(featuresFullData.(PUT{ii})(:,1), featuresFullData.(PUT{ii})(:,2));
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s a total signal regresion and regresions with all spatial featurs are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s a total signal regresion and regresions with all spatial featurs are the same\n', 100*p, PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the %s a total signal regresion and regresions with all spatial featurs are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the %s a total signal regresion and regresions with all spatial featurs are the same\n', 100*p, PUT{ii});
     end
 
     % test if lipid metric is better than sum signal metric
     p = ranksum(featuresFullData.(PUT{ii})(:,4), featuresFullData.(PUT{ii})(:,5));
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of adding lipids to regression of DAPI and CD45 is the same\n', 100*p,PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of adding lipids to regression of DAPI and CD45 is the same\n', 100*p,PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the  %s adding lipids to regression of DAPI and CD45 is the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s adding lipids to regression of DAPI and CD45 is the same\n', 100*p, PUT{ii});
     end
 
 
     [h, p] = vartest2(featuresFullData.(PUT{ii})(:,4), featuresFullData.(PUT{ii})(:,5));
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that variances of the %s for the live cell assay with Bodipy is the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that variances of the %s for the live cell assay with Bodipy is the same\n', 100*p, PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that variances of the %s for a live cell assay with Bodipy is the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that variances of the %s for a live cell assay with Bodipy is the same\n', 100*p, PUT{ii});
     end
 
      % test two features are better than 1 features
     p = ranksum(featuresFullData.(PUT{ii})(:,7), featuresFullData.(PUT{ii})(:,10));
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of two channel metrics is the same as 1 channel \n', 100*p,PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of two channel metrics is the same as 1 channel \n', 100*p,PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the  %s of two channel metrics is the same as 1 channel \n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s of two channel metrics is the same as 1 channel \n', 100*p, PUT{ii});
     end
     
          % test two features are better than 1 features
     p = ranksum(featuresFullData.(PUT{ii})(:,7), featuresFullData.(PUT{ii})(:,3));
     if(p < .05)
-        fprintf('Reject null hypothesis with p=%.2f%% confidence that the %s of three channel metrics is the same as two channels \n', 100*p,PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of three channel metrics is the same as two channels \n', 100*p,PUT{ii});
     else
-        fprintf('Fail to reject null hypothesis with p=%.2f%% confidence that the  %s of three channel metrics is the same as two channels \n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s of three channel metrics is the same as two channels \n', 100*p, PUT{ii});
     end
     
-    fprintf('\n');
+    fprintf(fid, '\n');    
 end
+    fclose(fid);
 end

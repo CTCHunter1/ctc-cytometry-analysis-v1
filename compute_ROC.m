@@ -1,5 +1,8 @@
-% returns sensitivity and fp estimate for D+, D- inputs
 function [fp, sens, T, AUC] = compute_ROC(Dp, Dn, method, bGenerateFigures, pathname)
+% returns sensitivity and fp estimate for D+ (Dp), D- (Dn) inputs
+
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
 
 if nargin == 0
     create_manuscript_figures; 

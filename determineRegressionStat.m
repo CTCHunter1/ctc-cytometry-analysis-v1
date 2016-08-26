@@ -1,4 +1,7 @@
 function [FeatStat] = determineRegressionStat(NDAll, DNACutOff, regressionFolder)
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
+
 % overloading in Matlab isn't so easy, changed to bring ND in
 % as 1x4 or 1x5 cell array so mixed data could be added
 % to the regStats

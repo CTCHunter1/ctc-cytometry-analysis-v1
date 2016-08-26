@@ -1,5 +1,9 @@
-% Created by: G. Futia
 function [] = selectAndRegress2(wbcFileName, mcf7FileName, savepathmat, savepatheqn)
+% selectAndRegress2:
+
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
+
 
 if ~exist('savepathmat', 'var')
     if(exist('wbcFileName', 'var'))

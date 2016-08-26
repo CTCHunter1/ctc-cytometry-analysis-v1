@@ -1,6 +1,10 @@
 function [] = create_manuscript_histograms(Dp, Dn, Mixed, featuresFullData, DNACutOff, pathname)
+% create_manuscript_histograms: 
 % DP is disease poisitve = MCF7
 % Dn is diesease negative = WBCs
+
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
 
 if nargin == 0
    create_manuscript_figures;   

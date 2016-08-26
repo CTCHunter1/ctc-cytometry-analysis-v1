@@ -1,4 +1,7 @@
 function [scores] = data_to_regressed_scored(ND, regressionFilename)
+% Copyright (C) 2016  Gregory L. Futia
+% This work is licensed under a Creative Commons Attribution 4.0 International License.
+
 % takes a data structure and scores it along a predone regression loaded
 % from regression.mat
 
