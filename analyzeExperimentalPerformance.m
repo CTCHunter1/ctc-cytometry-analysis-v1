@@ -245,7 +245,7 @@ regStatsAll = regStatsAll(~cellfun('isempty',regStatsAll));
 save([mainPath, fsepchar, 'featStatsAll.mat'], 'featStatsAll', 'featStatsAllName');
 save([mainPath, fsepchar, 'regStatsAll.mat'], 'regStatsAll', 'featStatsAllName');
 featFullData = createStatsTabAndPlots2(featStatsAll, [mainPath, fsepchar], 'feature', featStatsAllName);
-createStatsTabAndPlots2(regStatsAll, [mainPath, fsepchar], 'regression', featStatsAllName);
+regFullData = createStatsTabAndPlots2(regStatsAll, [mainPath, fsepchar], 'regression', featStatsAllName);
 
 figure(6);  
 clf;
