@@ -136,6 +136,9 @@ for ii=1:length(daysToProcess)
             % this will be the training data
             wbcTrain = wbcData{jj};
             mcf7Train = mcf7Data{kk};
+            wbcTrain = wbcTrain.ND;
+            mcf7Train = mcf7Train.ND;
+            
             % the testing data                    
             wbcTest = combineND(wbcData(1:Nwbcfiles~=jj));            
             mcf7Test = combineND(mcf7Data(1:Nmcf7files~=kk));
@@ -152,7 +155,7 @@ for ii=1:length(daysToProcess)
                 
             % featsStats is array of performance stats for the features
             % determineFeatureStats computes these metrics
-            featStats{indexFeatStats} = determineFeatureStat(mcf7Train.ND, wbcTrain.ND, ...
+            featStats{indexFeatStats} = determineFeatureStat(mcf7Train, wbcTrain, ...
                 mcf7Test, wbcTest, DNACutoff);
            
             regMatsPath = pathToRegMats;
@@ -187,7 +190,7 @@ for ii=1:length(daysToProcess)
             % overloading in Matlab isn't so easy, changed to bring ND in
             % as 1x4 or 1x5 cell array so mixed data could be added
             % to the regStats
-            regStats{indexFeatStats} = determineRegressionStat({mcf7Train.ND, wbcTrain.ND, ...
+            regStats{indexFeatStats} = determineRegressionStat({mcf7Train, wbcTrain, ...
                 mcf7Test, wbcTest, mixTest}, DNACutoff, regMatsPath);
             
 %             featStatsAll{Npairmax*(ii-1) + Nwbcfiles*(jj-1) + kk} = featStats{indexFeatStats};
