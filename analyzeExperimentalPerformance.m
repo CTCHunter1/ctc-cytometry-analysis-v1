@@ -42,6 +42,8 @@ DNACutoff = 65;
 % otherwise compute them
 bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
 bUsePooledRegs = 0; % the all regression instead of the training-testing pairings
+bSwapTrainTest = 0; % 0 small train big test (normal), 1 big train small test 
+
 Ndays = length(daysToProcess);
 
 
@@ -138,6 +140,16 @@ for ii=1:length(daysToProcess)
             wbcTest = combineND(wbcData(1:Nwbcfiles~=jj));            
             mcf7Test = combineND(mcf7Data(1:Nmcf7files~=kk));
             
+            if bSwapTrainTest == 1
+                wbcTemp = wbcTrain;
+                mcf7Temp = mcf7Train;
+                
+                wbcTrain = wbcTest;
+                mcf7Train = mcf7Test;
+                wbcTest = wbcTemp;
+                mcf7Test = mcf7Temp;                
+            end
+                
             % featsStats is array of performance stats for the features
             % determineFeatureStats computes these metrics
             featStats{indexFeatStats} = determineFeatureStat(mcf7Train.ND, wbcTrain.ND, ...

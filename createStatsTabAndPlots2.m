@@ -1,10 +1,17 @@
+function [featuresFullData] = createStatsTabAndPlots2(featuresMinDet, pathname, filenameprefix, featLabels)
+% featuresMinDet = cell array of performance statistics computed from determineFeatureStat
+% pathname - path to where to save the figures
+% filenameprefix - will put this prefix infront of the figure names
+%                  useful to generate figures for different performance
+%                  groups
+% featlLabels - Seperate labels for the performance statistics. Used for
+%               ANOVAs to determine source of experimental varation
+
 % Copyright (C) 2016  Gregory L. Futia
 % This work is licensed under a Creative Commons Attribution 4.0 International License.
 
-% this will start by loading the data, biggest part
 
-function [featuresFullData] = createStatsTabAndPlots(featuresMinDet, pathname, filenameprefix, featLabels)
-
+% this will start by loading and restructuring the data, biggest part
 % labels is expected to be the same length as featuresMinDet
 
 % featuresMinDet is a  cell array
@@ -31,7 +38,7 @@ regressionNamesNoDot = regexprep(regressionNames, '\.', '_');
 % regression names so it will work as a matlab field
 regressionNamesNoDot = regexprep(regressionNamesNoDot, '_{[^\{]*$', '');
 
-
+% we need to change the structure of the data for performing this analysis
 % initalize the storage data set and copy over the data
 for ii = 1:Nfields
     switch fieldNames{ii}
@@ -61,7 +68,11 @@ for ii = 1:Nfields
                     accum = accum + NROC;
                 end
             end
-            
+        case {'minDetectTestMax', 'fpTestMin', 'minDetectTrainMax', 'fpTrainMin'}
+            featuresFullData.(fieldNames{ii}) = zeros(1, Nvariants);
+            for kk=1:Nvariants
+                featuresFullData.(fieldNames{ii})(kk) = featuresMinDet{kk}.(fieldNames{ii});
+            end            
         otherwise         
             % this is for 1x1 scalar values           
             featuresFullData.(fieldNames{ii}) = zeros(Nvariants, Nregressions);
@@ -292,7 +303,7 @@ axh(ii) = axes('position', [ao, aob+ ((ii-1)/numFieldNamesForPlot)*ahscale, aw, 
             %else
             set(axh(ii), 'Ylim', [1, 5000]);   
             %end
-        case 'bFpIsZero'
+        case {'bFpIsZero', 'bFpTrainIsZero'}
         plot(axh(ii), sum(featuresFullData.(fieldNamesForPlot{ii})), 'kx');  
         set(axh(ii), 'XLim', [.5, Nregressions+.5]);
         set(gca, 'XTick', [1:Nregressions]);
@@ -649,7 +660,51 @@ if strcmp(filenameprefix, 'regression') && bPeformStatTest
     'sensMinDetectTest', 'd_cohen', 'AUCTest'};
 
 fid = fopen([pathname, 'hypothesis_test_results.txt'], 'w');
-    
+
+% Test is Ndet is driven by sample size
+p = ranksum(featuresFullData.minDetectTest(:,1), featuresFullData.minDetectTestMax);
+if(p < .05)
+    fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that Ndet of regressiosn 1 is the same as NdetMax\n', 100*p);
+else
+    fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that Ndet of regressiosn 1 is the same as NdetMax\n', 100*p);
+end
+
+% Test specificity is driven by sample size
+p = ranksum(featuresFullData.fpMinDetectTest(:,1), featuresFullData.fpTestMin);
+if(p < .05)
+    fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that fpTest of regressiosn 1 is the same as fpMin\n', 100*p);
+else
+    fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that Ndet of fpTest of regressiosn 1 is the same as fpMin\n', 100*p);
+end
+
+% What if we look at the training data
+% Ndet is driven by sample size
+p = ranksum(featuresFullData.minDetectTrain(:,1), featuresFullData.minDetectTrainMax);
+if(p < .05)
+    fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that NdetTrain of regressiosn 1 is the same as NdetTrainMax\n', 100*p);
+else
+    fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that NdetTrain of regressiosn 1 is the same as NdetTrainMax\n', 100*p);
+end
+
+% Test specificity is driven by sample size
+p = ranksum(featuresFullData.fpMinDetectTrain(:,1), featuresFullData.fpTrainMin);
+if(p < .05)
+    fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that fpTrain of regressiosn 1 is the same as fpTrainMin\n', 100*p);
+else
+    fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence fpTrain of regressiosn 1 is the same as fpTrainMin\n', 100*p);
+end
+
+% Ndet is driven by sample size
+p = kruskalwallis([featuresFullData.minDetectTrain(:,1:4)- featuresFullData.minDetectTrainMax.'*ones(1,4)], [], 'off')
+p = kruskalwallis([featuresFullData.minDetectTrain(:,1:4) featuresFullData.minDetectTrainMax.'], [], 'off');
+if(p < .05)
+    fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that NdetTrain of regressiosn 1-4 is the same as NdetTrainMax\n', 100*p);
+else
+    fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that NdetTrain of regressiosn 1-4 is the same as NdetTrainMax\n', 100*p);
+end
+
+fprintf(fid, '\n');
+
 for ii=1:length(PUT)
     % test if Reg1_all and 3 feature Regs are equivalent
     switch PUT{ii}
@@ -681,7 +736,7 @@ for ii=1:length(PUT)
     if(p < .05)
         fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of regressions with two and one channels are the same\n', 100*p, PUT{ii});
     else
-        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %sof regressions with two and one channels are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the % sof regressions with two and one channels are the same\n', 100*p, PUT{ii});
     end
 
     % test if 1 feature Regs are equivalent
@@ -695,44 +750,49 @@ for ii=1:length(PUT)
     % test if spatial features perform equal sum signal
     p = ranksum(featuresFullData.(PUT{ii})(:,1), featuresFullData.(PUT{ii})(:,2));
     if(p < .05)
-        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s a total signal regresion and regresions with all spatial featurs are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s a Reg1_all and Reg2_sigma are the same\n', 100*p, PUT{ii});
     else
-        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the %s a total signal regresion and regresions with all spatial featurs are the same\n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the %s a Reg1_all and Reg2_sigma are the same\n', 100*p, PUT{ii});
     end
 
-    % test if lipid metric is better than sum signal metric
-    p = ranksum(featuresFullData.(PUT{ii})(:,4), featuresFullData.(PUT{ii})(:,5));
+    % test if Reg1_all beats Reg3_DAPI+Bodipy+CD45
+    p = ranksum(featuresFullData.(PUT{ii})(:,1), featuresFullData.(PUT{ii})(:,3));
     if(p < .05)
-        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of adding lipids to regression of DAPI and CD45 is the same\n', 100*p,PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s Reg1_all and Reg3_DAPI+CD45+Panck are the same\n', 100*p, PUT{ii});
     else
-        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s adding lipids to regression of DAPI and CD45 is the same\n', 100*p, PUT{ii});
-    end
-
-
-    [h, p] = vartest2(featuresFullData.(PUT{ii})(:,4), featuresFullData.(PUT{ii})(:,5));
-    if(p < .05)
-        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that variances of the %s for the live cell assay with Bodipy is the same\n', 100*p, PUT{ii});
-    else
-        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that variances of the %s for a live cell assay with Bodipy is the same\n', 100*p, PUT{ii});
-    end
-
-     % test two features are better than 1 features
-    p = ranksum(featuresFullData.(PUT{ii})(:,7), featuresFullData.(PUT{ii})(:,10));
-    if(p < .05)
-        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of two channel metrics is the same as 1 channel \n', 100*p,PUT{ii});
-    else
-        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s of two channel metrics is the same as 1 channel \n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the %s Reg1_all and Reg3_DAPI+CD45+Panck are the same\n', 100*p, PUT{ii});
     end
     
-         % test two features are better than 1 features
-    p = ranksum(featuresFullData.(PUT{ii})(:,7), featuresFullData.(PUT{ii})(:,3));
+    % test if DAPI+Bodipy+CD45 is better than DAPI+CD45+PanCK
+    p = ranksum(featuresFullData.(PUT{ii})(:,3), featuresFullData.(PUT{ii})(:,4));
     if(p < .05)
-        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of three channel metrics is the same as two channels \n', 100*p,PUT{ii});
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that the %s of Reg3_DAPI+PanCK+CD45 is the same as Reg4_DAPI+Bodipy+CD45\n', 100*p,PUT{ii});
     else
-        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s of three channel metrics is the same as two channels \n', 100*p, PUT{ii});
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that the  %s Reg3_DAPI+PanCK+CD45 is the same as Reg4_DAPI+Bodipy+CD45\n', 100*p, PUT{ii});
     end
+
+
+    [h, p] = vartest2(featuresFullData.(PUT{ii})(:,3), featuresFullData.(PUT{ii})(:,4));
+    if(p < .05)
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that variances of the %s for the Reg3_DAPI+PanCK+CD45 is the same as Reg4_DAPI+Bodipy+CD45\n', 100*p, PUT{ii});
+    else
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that variances of the %s for a Reg3_DAPI+PanCK+CD45 is the same as Reg4_DAPI+Bodipy+CD45\n', 100*p, PUT{ii});
+    end
+
     
     fprintf(fid, '\n');    
 end
     fclose(fid);
 end
+
+fid = fopen([pathname, 'stats_', filenameprefix ,'_ndet.txt'], 'w');
+
+for ii = 1:Nregressions
+    fprintf(fid, 'Biomarker: %s, Ndet = %.2f (median), %.2f (min), %.2f (max) \n', ...
+        featuresFullData.regressionNames{ii}, ...
+        median(featuresFullData.minDetectTest(:, ii)), ...
+        min(featuresFullData.minDetectTest(:, ii)), max(featuresFullData.minDetectTest(:, ii)));
+end
+
+fclose(fid);
+    

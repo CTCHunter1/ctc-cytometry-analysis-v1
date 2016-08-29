@@ -117,6 +117,14 @@ if exist('Dmix', 'var')
 end
 
 SNR = 2;
+FeatStat.SNR = SNR;
+NDnTest = sum(DNApDntest);
+FeatStat.minDetectTestMax = (1+SNR*NDnTest.^-1)./(SNR*NDnTest.^-1);
+FeatStat.fpTestMin = NDnTest.^-1;
+
+NDnTrain = sum(DNAp);
+FeatStat.fpTrainMin = NDnTrain.^-1;
+FeatStat.minDetectTrainMax = (1+SNR*NDnTrain.^-1)./(SNR*NDnTrain.^-1);
 
 zspace = linspace(-5, 5);
 fp_no_use = normcdf(zspace);
@@ -159,18 +167,9 @@ for ii = 1:Nregressions
     
     
     uptrain = mean(dpScored);
-    untrain = mean(dnScored);
-    
-    % if fp = 0 we didn't sample enough to measure it. set it equal
-    % to these sample size instead to prvent div 0 errors
-    if sum(fp==0) > 0
-        FeatStat.bFpTrainIsZero(ii) = 1;
-    end
-        
-    fp(fp==0) = 1./length(dnScored);      
-    %sens = sens(fp~=0);
-    %T = T(fp~=0);
-    %fp = fp(fp~=0);    
+    untrain = mean(dnScored);    
+            
+    fp(fp==0) = 1./length(dnScored);       
     [FeatStat.minDetectTrain(ii), minDetInd] = max((sens+SNR*fp)./(SNR*fp));
     FeatStat.fpMinDetectTrain(ii) = fp(minDetInd);
     FeatStat.sensMinDetectTrain(ii) = sens(minDetInd);
@@ -179,6 +178,13 @@ for ii = 1:Nregressions
         dnTestScored));
     FeatStat.d_cohenTrain(ii) = abs(cohensD(dpScored, ...
         dnScored));
+    
+    % if fp = 0 we didn't sample enough to measure it. set it equal
+    % to these sample size instead to prvent div 0 errors
+    if FeatStat.fpMinDetectTrain(ii) == FeatStat.fpTrainMin
+        FeatStat.bFpTrainIsZero(ii) = 1;
+    end    
+    
     
     FeatStat.sensTrainROC{ii} = sens;
     FeatStat.fpTrainROC{ii} = fp;
@@ -192,17 +198,17 @@ for ii = 1:Nregressions
         sensTest = sum(dpTestScored ...
             > FeatStat.TMinDetect(ii))./sum(DNApDptest);
         fpTest = sum(dnTestScored ...
-            > FeatStat.TMinDetect(ii))./sum(DNApDptest);
+            > FeatStat.TMinDetect(ii))./sum(DNApDntest);
     else
         % diease positive is to left of disease negative
         sensTest = sum(dpTestScored ...
             < FeatStat.TMinDetect(ii))./sum(DNApDptest);
         fpTest = sum(dnTestScored ...
-            < FeatStat.TMinDetect(ii))./sum(DNApDptest);
+            < FeatStat.TMinDetect(ii))./sum(DNApDntest);
     end
         
     if fpTest == 0
-        fpTest = 1/sum(DNApDptest);
+        fpTest = 1/sum(DNApDntest);
         FeatStat.bFpIsZero(ii) = 1;
     end
     

@@ -44,6 +44,10 @@ FeatStat.AUC = zeros(1, length(regressionNames));
 FeatStat.d_cohen = zeros(1, length(regressionNames));
 
 SNR = 2;
+FeatStat.SNR = SNR;
+NDnTest = sum(DNApDntest);
+FeatStat.minDetectTestMax = (1+SNR*NDnTest.^-1)./(SNR*NDnTest.^-1);
+FeatStat.fpTestMin = NDnTest.^-1;
 
 zspace = linspace(-5, 5);
 fp_no_use = normcdf(zspace);
@@ -66,6 +70,7 @@ for kk = 1:length(channelNames)
     if sum(fp==0) > 0
         FeatStat.bFpTrainIsZero(ii) = 1;
     end
+    
     fp(fp==0) = 1./length(Dn.Channels.(channelNames{jj}).(features{ll})(DNAp));      
     %sens = sens(fp~=0);
     %T = T(fp~=0);
@@ -88,17 +93,17 @@ for kk = 1:length(channelNames)
         sensTest = sum(Dptest.Channels.(channelNames{jj}).(features{ll})(DNApDptest) ...
             > FeatStat.TMinDetect(ii))./sum(DNApDptest);
         fpTest = sum(Dntest.Channels.(channelNames{jj}).(features{ll})(DNApDntest) ...
-            > FeatStat.TMinDetect(ii))./sum(DNApDptest);
+            > FeatStat.TMinDetect(ii))./sum(DNApDntest);
     else
         % diease positive is to left of disease negative
         sensTest = sum(Dptest.Channels.(channelNames{jj}).(features{ll})(DNApDptest) ...
             < FeatStat.TMinDetect(ii))./sum(DNApDptest);
         fpTest = sum(Dntest.Channels.(channelNames{jj}).(features{ll})(DNApDntest) ...
-            < FeatStat.TMinDetect(ii))./sum(DNApDptest);
+            < FeatStat.TMinDetect(ii))./sum(DNApDntest);
     end
         
     if fpTest == 0
-        fpTest = 1/sum(DNApDptest);
+        fpTest = 1/sum(DNApDntest);
         FeatStat.bFpIsZero(ii) = 1;
     end
     
