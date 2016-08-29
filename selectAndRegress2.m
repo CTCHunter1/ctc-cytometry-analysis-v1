@@ -1,4 +1,4 @@
-function [] = selectAndRegress2(wbcFileName, mcf7FileName, savepathmat, savepatheqn)
+function [] = selectAndRegress2(NDn, NDp, savepathmat, savepatheqn)
 % selectAndRegress2:
 
 % Copyright (C) 2016  Gregory L. Futia
@@ -93,7 +93,7 @@ fprintf('On Regression: %s\n', regName{1});
 
 % this will create the regression All file name used 
 % the for loop with sort though this file for the best regression
-feature_selection(selectedChannels{1}, selectedFeatures{1}, regName{1}, {wbcFileName, mcf7FileName}, savepathmat);
+feature_selection(selectedChannels{1}, selectedFeatures{1}, regName{1}, NDp, NDn, savepathmat);
 
 for ii = 1:numRegresions
     regressionFile = [savepathmat, strrep(regName{ii}, '\', ''), '.mat'];

@@ -24,6 +24,7 @@ if(nargin < 1)
 elseif nargin == 1
     savefilename = 'Combined Data.mat';
 end
+
 NumFiles = length(data);
 
 
@@ -35,8 +36,14 @@ for ii = 1:NumFiles;
     if nargin < 1
         data{ii} = load(fullfile(pathnames{ii}, filenames{ii}));
     end
-    Npts = Npts + data{ii}.ND.numROIs;
-    NptsFile(ii) = data{ii}.ND.numROIs;
+    if isfield(data{ii}, 'ND')       
+        Npts = Npts + data{ii}.ND.numROIs;
+        NptsFile(ii) = data{ii}.ND.numROIs; 
+    else
+        Npts = Npts + data{ii}.numROIs;
+        NptsFile(ii) = data{ii}.numROIs;
+        data{ii}.ND = data{ii};
+    end
 end
 
 ND.fileName = savefilename;

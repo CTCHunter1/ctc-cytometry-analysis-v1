@@ -40,9 +40,9 @@ DNACutoff = 65;
 
 % load the regressions form files
 % otherwise compute them
-bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
+bLoad = 0; % 0 for compute; 1 for load. Running code in compute can take days.
 bUsePooledRegs = 0; % the all regression instead of the training-testing pairings
-bSwapTrainTest = 0; % 0 small train big test (normal), 1 big train small test 
+bSwapTrainTest = 1; % 0 small train big test (normal), 1 big train small test 
 
 Ndays = length(daysToProcess);
 
@@ -72,7 +72,7 @@ for ii=1:length(daysToProcess)
     ND = combineND(wbcData);
     % save the combined WBC data in the root day path with the day after
     % the file name
-    save([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'wbc_', daysToProcess{ii}, '.mat'], 'ND');
+    parsave([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'wbc_', daysToProcess{ii}, '.mat'], ND);
     WBCDataAll{ii}.ND = ND;
     
     mcf7Path = [mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'MCF7', ...
@@ -92,7 +92,7 @@ for ii=1:length(daysToProcess)
     
     % save the combined MCF7 data in the root day path with the after the
     % file name
-    save([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mcf7_', daysToProcess{ii}, '.mat'], 'ND');
+    parsave([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mcf7_', daysToProcess{ii}, '.mat'], ND);
     MCF7DataAll{ii}.ND = ND;
    
     mixPath = [mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'Mix', ...
@@ -113,7 +113,7 @@ for ii=1:length(daysToProcess)
     
     % save the combined MCF7 data in the root day path with the after the
     % file name
-    save([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mix_', daysToProcess{ii}, '.mat'], 'ND');
+    parsave([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mix_', daysToProcess{ii}, '.mat'], ND);
     MixDataAll{ii}.ND = ND;
     
     pathToRegMats = [mainPath, fsepchar, daysToProcess{ii}, fsepchar, 'Reg Mats' fsepchar];
@@ -183,7 +183,7 @@ for ii=1:length(daysToProcess)
                if bLoad == 0
                 % this will populate the RegMats directory if it isn't
                 % already populated. 
-                selectAndRegress2([wbcPath wbcFilenames{jj}], [mcf7Path mcf7Filenames{kk}] ,regMatsPath, eqnPath);               
+                selectAndRegress2(wbcTrain, mcf7Train, regMatsPath, eqnPath);               
                end
             end
             

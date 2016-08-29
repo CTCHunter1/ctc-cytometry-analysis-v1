@@ -1,64 +1,28 @@
+function [ ] = feature_selection(selectedChannels, selectedFeatures, regName, NDp, NDn, saveFilePath)
 % feature_selection.m
-
-% performs feature selection to produce maximum descrimination between
-% two classes. Uses discriminant analysis. 
-
+% selectedChannels - channels to perform feature selection on
+% selectedFeautres - features(metrics) to perform feature selection on
+% regName - Name for this regreesion
+% NDp - ND vector from disease positive used to train regression
+% NDn - ND vector from diesase negative used to train regreession
+% saveFilePath - path to save the regression, with regName into
+%
 % Copyright (C) 2016  Gregory L. Futia
 % This work is licensed under a Creative Commons Attribution 4.0 International License.
-
-
-function [ ] = feature_selection(selectedChannels, selectedFeatures, regName, filenames, saveFilePath)
-
-if(~exist('filenames', 'var'))
-    if ~exist('filenames.mat', 'file')
-        [filenames{1}, pathnames{1}] = uigetfile('*.mat', 'Select WBC File', 'C:\Repository\Projects\Nuclear Second Moment\Code\Processed Mats');    
-
-        if isequal(filenames{1},0) || isequal(pathnames{1},0)
-            return;
-        end
-
-        [filenames{2}, pathnames{2}] = uigetfile('*.mat', 'Select Cancer Cell File', 'C:\Repository\Projects\Nuclear Second Moment\Code\Processed Mats');    
-
-        if isequal(filenames{2},0) || isequal(pathnames{2},0)
-            return;
-        end
-    end
-else
-    pathnames = cell(1, length(filenames));
-    for ii = 1:2
-        [pathnames{ii}, filenames{ii}, ext] = fileparts(filenames{ii});
-        filenames{ii} = [filenames{ii}, ext];
-    end
-end
-
-if(~exist('saveFilePath', 'var'))
-    [saveFilePath, ~, ~] = fileparts(filenames{1});
-end
 
 % put a / at the end of save file path if it doesn't already have one
 if saveFilePath(end) ~= filesep
     saveFilePath = [saveFilePath, filesep];
 end
     
-% For discriminant analysis we will attempt to regress against WBC=0,
+% For discriminant analysis we will attempt to regress against 
+% WBC=0,
 % Cancer = 1
-NumFiles = 2; % the last cell is empty
 
-
-% determine number of points
-Npts = 0;
-data = cell(1, NumFiles);
-
-% determine how many data points there are
-for ii = 1:NumFiles;    
-    data{ii} = load(fullfile(pathnames{ii}, filenames{ii}));
-    Npts = Npts + data{ii}.ND.numROIs;
-end
-
-ND = combineND(data);
+ND = combineND({NDp, NDn});
 ND.Y = zeros(1, ND.numROIs, 'uint8');
 % the second file is the MCF7 file set all those points equal to 1
-ND.Y(data{1}.ND.numROIs + 1:end) = 1; 
+ND.Y(1:NDp.numROIs) = 1; 
 
 % determine the number of features = num chnannels x metrics
 numFeatures = 0;
