@@ -40,7 +40,7 @@ DNACutoff = 65;
 
 % load the regressions form files
 % otherwise compute them
-bLoad = 0; % 0 for compute; 1 for load. Running code in compute can take days.
+bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
 bUsePooledRegs = 0; % the all regression instead of the training-testing pairings
 bSwapTrainTest = 1; % 0 small train big test (normal), 1 big train small test 
 
@@ -166,7 +166,15 @@ for ii=1:length(daysToProcess)
                % in reg mats we need to create a folder called regvars
                % take the .mat off the wbc & mcf7 file names
                % this will be the name for this folder pairings
-               regDirName = [wbcFilenames{jj}(1:end-4) '_' mcf7Filenames{kk}(1:end-4)];
+               % unless bSwapTrainTest == 1 then add bSwap at the end
+               
+                
+               if bSwapTrainTest == 1
+                    regDirName = [wbcFilenames{jj}(1:end-4) '_' mcf7Filenames{kk}(1:end-4), '_Swapped'];
+               else
+                    regDirName = [wbcFilenames{jj}(1:end-4) '_' mcf7Filenames{kk}(1:end-4)];
+               end
+               
                regMatsPath = [pathToRegMats, regDirName, filesep];
                eqnPath = [pathToEqns, regDirName, filesep];
                
@@ -177,6 +185,7 @@ for ii=1:length(daysToProcess)
                if ~exist(eqnPath', 'dir')
                    mkdir(eqnPath);
                end
+               
                
                % perform features selection and regression on the training
                % data
