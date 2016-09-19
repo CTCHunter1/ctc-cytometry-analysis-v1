@@ -7,8 +7,7 @@ function [] = create_manuscript_histograms(Dp, Dn, Mixed, featuresFullData, DNAC
 % This work is licensed under a Creative Commons Attribution 4.0 International License.
 
 if nargin == 0
-   create_manuscript_figures;   
-   return;
+   [Dp, Dn, Mixed, DNACutOff, pathname] = loadCytoData();   
 end
 
 
