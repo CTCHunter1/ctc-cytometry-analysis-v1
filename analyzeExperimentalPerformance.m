@@ -42,11 +42,11 @@ DNACutoff = 65;
 % otherwise compute them
 bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
 bUsePooledRegs = 0; % the all regression instead of the training-testing pairings
-bSwapTrainTest = 1; % 0 small train big test (normal), 1 big train small test 
+bSwapTrainTest = 0; % 0 small train big test (normal), 1 big train small test 
 
 Ndays = length(daysToProcess);
 
-
+% one cell for each day of data
 WBCDataAll = cell(1, Ndays);
 MCF7DataAll = cell(1, Ndays);
 MixDataAll = cell(1, Ndays);

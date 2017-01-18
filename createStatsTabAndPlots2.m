@@ -48,9 +48,22 @@ for ii = 1:Nfields
         case {'sensTrainROC', 'fpTrainROC', 'sensTestROC', 'fpTestROC', ...
                 'dpTrainScored', 'dnTrainScored', 'dpTestScored', 'dnTestScored', ...
                 'dMixScored'}  
+            bLabelVar = 0; % 0, don't create a label variable, 1 create
+            
+            % for these variables we also want to create a label variable
+            % for the day the data came from and the technical varient
+            % - these labels will allow us to use an ANOVA to determine if
+            % between our within group variances are dominate
+            switch fieldNames{ii}
+                case { 'dpTrainScored', 'dnTrainScored', 'dpTestScored', 'dnTestScored'}
+                    bLabelVar = 1; % 0, don't create a label variable, 1 create
+            end
+            
             % figure out how long the array will be
             featuresFullData.(fieldNames{ii}) = cell(1, Nregressions);
             for kk = 1:Nregressions
+                % determine how many points we need to allociate for the
+                % combined arrays
                 Npts = 0;
                 for jj=1:Nvariants
                     Npts = Npts + length(featuresMinDet{jj}.(fieldNames{ii}){kk});                          
@@ -59,12 +72,31 @@ for ii = 1:Nfields
                 % try to allocate the array here, it might not be square
                 featuresFullData.(fieldNames{ii}){kk} = zeros(1, Npts);
 
+                if bLabelVar == 1
+                    featuresFullData.([fieldNames{ii} , 'TechLabel']){kk} = cell(1, Npts);
+                    if exist('featLabels', 'var') == 1
+                        featuresFullData.([fieldNames{ii} , 'DayLabel']){kk} = cell(1, Npts);                
+                    end                
+                end          
+
+                                
                 accum = 0;
                 for jj = 1:Nvariants
                     NROC = length(featuresMinDet{jj}.(fieldNames{ii}){kk});                    
-                    % one long array
+                    % one longfea array
                     featuresFullData.(fieldNames{ii}){kk}(accum+[1:NROC]) = ...
                         featuresMinDet{jj}.(fieldNames{ii}){kk};
+                    
+                    if bLabelVar == 1
+                        for zz = 1:NROC
+                            featuresFullData.([fieldNames{ii} , 'TechLabel']){kk}{accum+zz} = ...
+                                int2str(jj);
+                            if exist('featLabels', 'var') == 1
+                                featuresFullData.([fieldNames{ii} , 'DayLabel']){kk}{accum+zz} = ...
+                                    featLabels{jj};
+                            end
+                        end
+                    end                    
                     accum = accum + NROC;
                 end
             end
@@ -638,7 +670,8 @@ saveas(gcf, [pathname, filenameprefix, 'ROCcloud', '.png'], 'png');
 saveas(gcf, [pathname, filenameprefix, 'ROCcloud', '.emf'], 'emf');  
 
 
-if isfield(featuresFullData, 'dpTestScored')
+if isfield(featuresFullData, 'dpTestScored') && ...
+    isfield(featuresFullData, 'dpMixScored')
     figure(5);
     clf;
     CreateRegressionHistograms(featuresFullData.regressionNames, ...
@@ -792,7 +825,102 @@ for ii = 1:Nregressions
         featuresFullData.regressionNames{ii}, ...
         median(featuresFullData.minDetectTest(:, ii)), ...
         min(featuresFullData.minDetectTest(:, ii)), max(featuresFullData.minDetectTest(:, ii)));
+    
+    
 end
 
 fclose(fid);
+
+fid = fopen([pathname, 'stats_', filenameprefix ,'_featurevarations.txt'], 'w');   
+
+fprintf(fid, 'ANOVA results comparing technical and interday varation between groups\n');
+
+for ii = 1:Nregressions
+    fprintf('Regression %d \n', ii);
+    [pDp] = anova1(featuresFullData.dpTrainScored{ii}, featuresFullData.dpTrainScoredTechLabel{ii}, 'off');   
+    [pDn] = anova1(featuresFullData.dnTrainScored{ii}, featuresFullData.dnTrainScoredTechLabel{ii}, 'off');
     
+    fprintf(fid, '%s D+ Tech: ', featuresFullData.regressionNames{ii});
+    if(pDp < .05)
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D+ technical varients are the same\n', 100*pDp);
+    else
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that mean positions of D+ technical varients are the same\n', 100*pDp);    
+    end
+    fprintf('\n');
+    
+    fprintf(fid, '%s D- Tech: ', featuresFullData.regressionNames{ii});
+    if(pDn < .05)
+        fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D- technical varients are the same\n', 100*pDn);
+    else
+        fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that mean positions of D- technical varients are the same\n', 100*pDn);    
+    end
+    
+    if exist('featLabels', 'var') == 1
+        [pDp] = anova1(featuresFullData.dpTrainScored{ii}, featuresFullData.dpTrainScoredDayLabel{ii}, 'off');   
+        [pDn] = anova1(featuresFullData.dnTrainScored{ii}, featuresFullData.dnTrainScoredDayLabel{ii}, 'off');
+
+        fprintf(fid, '%s D+ Day (1-way): ', featuresFullData.regressionNames{ii});
+        if(pDp < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D+ days are the same\n', 100*pDp);
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that mean positions of D+ days varients are the same\n', 100*pDp);    
+        end
+        
+        fprintf(fid, '%s D- Day (1-way): ', featuresFullData.regressionNames{ii});
+        if(pDn < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D- technical varients are the samem\n', 100*pDn);
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that mean positions of D- technical varients are the same\n', 100*pDn);    
+        end 
+        
+        % do for 2 way anova
+        [pDp] = anovan(featuresFullData.dpTrainScored{ii}, {featuresFullData.dpTrainScoredDayLabel{ii}, featuresFullData.dpTrainScoredTechLabel{ii}}, 'model', 2, 'varnames', {'days', 'tech'}, 'display', 'off');  
+        [pDn] = anovan(featuresFullData.dnTrainScored{ii}, {featuresFullData.dnTrainScoredDayLabel{ii}, featuresFullData.dnTrainScoredTechLabel{ii}}, 'model', 2, 'varnames', {'days', 'tech'}, 'display', 'off'); 
+
+        fprintf(fid, '%s D+ Day (2-way) Day: ', featuresFullData.regressionNames{ii});
+        if(pDp(1) < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D+ Days are the same\n', 100*pDp(1));
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence mean positions of D+ Days are the same\n', 100*pDp(1));    
+        end
+        
+        fprintf(fid, '%s D+ Day (2-way) Tech: ', featuresFullData.regressionNames{ii});
+        if(pDp(2) < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D+ Tech are the same\n', 100*pDp(2));
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence mean positions of D+ Tech are the same\n', 100*pDp(2));    
+        end
+        
+        fprintf(fid, '%s D+ Day (2-way) Day*Tech: ', featuresFullData.regressionNames{ii});
+        if(pDp(3) < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence there is no interaction between day and tech in D+ \n', 100*pDp(3));
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence there is no interaction between day and tech in D+\n', 100*pDp(3));    
+        end
+        
+        fprintf(fid, '%s D- Day (2-way) Day: ', featuresFullData.regressionNames{ii});
+        if(pDn(1) < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D- Days are the same\n', 100*pDn(1));
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence mean positions of D- Days are the same\n', 100*pDn(1));    
+        end
+        
+        fprintf(fid, '%s D- Day (2-way) Tech: ', featuresFullData.regressionNames{ii});
+        if(pDn(2) < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that mean positions of D- Tech are the same\n', 100*pDn(2));
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence mean positions of D- Tech are the same\n', 100*pDn(2));    
+        end
+        
+        fprintf(fid, '%s D- Day (2-way) Day*Tech: ', featuresFullData.regressionNames{ii});
+        if(pDn(3) < .05)
+            fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence there is no interaction between day and tech in D- \n', 100*pDn(3));
+        else
+            fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence there is no interaction between day and tech in D- \n', 100*pDn(3));    
+        end
+               
+    end
+    fprintf('\n');
+end
+
+fclose(fid);
