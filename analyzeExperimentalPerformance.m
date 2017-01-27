@@ -41,7 +41,10 @@ DNACutoff = 65;
 % load the regressions form files
 % otherwise compute them
 bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
-bUsePooledRegs = 0; % the all regression instead of the training-testing pairings
+bUsePooledRegs = 1; % 0 for a different regression (set) for each of the training testing pairings
+% 1 for using 1 regression (set) for all the data, if set to 1
+% the path below path will be used to find those regs
+regPathPooled = ['day9-15merge', fsepchar, 'Reg Mats'];
 bSwapTrainTest = 1; % 0 small train big test (normal), 1 big train small test 
 
 Ndays = length(daysToProcess);
@@ -116,8 +119,14 @@ for ii=1:length(daysToProcess)
     parsave([mainPath, fsepchar , daysToProcess{ii}, fsepchar, 'mix_', daysToProcess{ii}, '.mat'], ND);
     MixDataAll{ii}.ND = ND;
     
+    if bUsePooledRegs == 0
     pathToRegMats = [mainPath, fsepchar, daysToProcess{ii}, fsepchar, 'Reg Mats' fsepchar];
     pathToEqns = [mainPath, fsepchar, daysToProcess{ii}, fsepchar, 'Reg Equations' fsepchar];
+    elseif bUsePooledRegs == 1
+        pathToRegMats = [mainPath, fsepchar, regPathPooled, fsepchar];
+        pathToEqns = [mainPath, fsepchar, regPathPooled, fsepchar];
+    end
+    
     % if these directories don't exist create them
     if ~exist(pathToRegMats, 'dir')
         mkdir(pathToRegMats);
