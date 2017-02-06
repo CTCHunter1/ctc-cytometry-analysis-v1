@@ -74,7 +74,7 @@ for ii = 1:Nfields
                 featuresFullData.(fieldNames{ii})(kk) = featuresMinDet{kk}.(fieldNames{ii});
             end            
         otherwise         
-            % this is for 1x1 scalar values           
+            % this is for 1x1 scalar values, like Cohen's D, AUC..         
             featuresFullData.(fieldNames{ii}) = zeros(Nvariants, Nregressions);
             % copy in the data
             for jj = 1:Nvariants
@@ -218,7 +218,14 @@ featuresFullData.regressionNames = regexprep(featuresFullData.regressionNames, '
 featuresFullData.regressionNames = regexprep(featuresFullData.regressionNames, '.radius_invm', ' < r_f > ');
 
 %%
-figSize = [.25, 2, 6.5/2, 3.75];
+bLannin = isfield(featuresFullData, 'AUCTestLannin') && 1;
+
+if bLannin
+    figSize = [.25, 2, 6.5/2, 4.25];
+else    
+    figSize = [.25, 2, 6.5/2, 3.75];
+end
+
 
 titlePos = [.26, .46];
 
@@ -236,15 +243,24 @@ xshiftTick = .052;
 
 switch filenameprefix
     case 'regression'
-    fieldNamesForPlot = {'bFpIsZero', 'minDetectTest', 'fpMinDetectTest', ...
-        'sensMinDetectTest', 'd_cohen', 'AUCTest', };
+        if bLannin
+            fieldNamesForPlot = {'bFpIsZero', 'minDetectTest', 'fpMinDetectTest', ...
+                'sensMinDetectTest', 'd_cohen', 'AUCTestLannin', 'AUCTest'};
+            fieldNamesYLabel = {'FP Zero' 'N_{det}', 'Spec.', 'Sens.', ...
+            'd', 'AUC_l', 'AUC', }; 
+        else
+            fieldNamesForPlot = {'bFpIsZero', 'minDetectTest', 'fpMinDetectTest', ...
+                'sensMinDetectTest', 'd_cohen', 'AUCTest'};
+            fieldNamesYLabel = {'FP Zero' 'N_{det}', 'Spec.', 'Sens.', ...
+            'd', 'AUC', }; 
+        end
     case 'feature'
     fieldNamesForPlot = {'bFpIsZero', 'minDetectTest', 'fpMinDetectTest', ...
         'sensMinDetectTest', 'd_cohen', 'AUC', };
+    fieldNamesYLabel = {'FP Zero' 'N_{det}', 'Spec.', 'Sens.', ...
+    'd', 'AUC', }; 
 end
 
-fieldNamesYLabel = {'FP Zero' 'N_{det}', 'Spec.', 'Sens.', ...
-    'd', 'AUC', }; 
 
 % TMinDetect needs to be scaled to the units of the feature
 numFieldNamesForPlot = length(fieldNamesForPlot);
@@ -255,7 +271,12 @@ ao = .15;
 aob = .28;
 aot = .0;
 aw = .75;
-ah = .105;
+if bLannin == 1
+    ah = .095;
+else
+    ah = .105;
+end
+
 ahscale = .73;
 
 
@@ -265,7 +286,7 @@ for ii = 1:numFieldNamesForPlot
 axh(ii) = axes('position', [ao, aob+ ((ii-1)/numFieldNamesForPlot)*ahscale, aw, ah]);   
 
     switch fieldNamesForPlot{ii}
-        case {'AUC', 'AUCTest', 'fpMinDetectTest', 'sensMinDetectTest', ...
+        case {'AUC', 'AUCTest', 'AUCTestLannin', 'fpMinDetectTest', 'sensMinDetectTest', ...
                 'fpMinDetectTrain', 'sensMinDetectTrain'}
         % put the AUC values on a z-scored axis
         switch fieldNamesForPlot{ii}
@@ -274,12 +295,22 @@ axh(ii) = axes('position', [ao, aob+ ((ii-1)/numFieldNamesForPlot)*ahscale, aw, 
             otherwise
             boxplot(axh(ii), norminv(featuresFullData.(fieldNamesForPlot{ii})));
         end
+        
+        switch fieldNamesForPlot{ii}
+            case 'AUCTestLannin'
+                yLim = norminv([.031, .053]);
+                set(axh(ii), 'Ylim', yLim);
+                yTick = [.035, .04, .045, .05];
+                set(axh(ii), 'YTick', norminv(yTick));
+        end 
+        
         yTicks = get(axh(ii), 'YTick');
         yTickLabels = sprintfc('%.3f', normcdf(yTicks));
-       %yTickLabels = cellfun(@num2str, yTickLabels);
-        xLim = get(axh(ii), 'Xlim');
+       %yTickLabels = cellfun(@num2str, yTickLabels);        
+       xLim = get(axh(ii), 'Xlim');   
         yLim = get(axh(ii), 'Ylim');
-       
+        
+        
         set(axh(ii), 'YTickLabel', yTickLabels);
         axZ = axes('position', [ao, aob+ ((ii-1)/numFieldNamesForPlot)*ahscale, aw, ah]);
         h = plot(xLim, yLim);
@@ -324,7 +355,11 @@ axh(ii) = axes('position', [ao, aob+ ((ii-1)/numFieldNamesForPlot)*ahscale, aw, 
 
     ylabel(axh(ii), fieldNamesYLabel{ii}, 'Interpreter', 'Tex');
     
-    annotation('line', [.03, .97], [.76, .76], 'Color', 'k', 'linewidth', .25);
+    if bLannin == 1
+    annotation('line', [.03, .97], [.795, .795], 'Color', 'k', 'linewidth', .25);
+    else
+    annotation('line', [.03, .97], [.76, .76], 'Color', 'k', 'linewidth', .25);    
+    end
     
 % for soem unknown reason ploting in a axes resizes it
 % lets just set it back to what it should be
@@ -678,7 +713,7 @@ else
 end
 
 % What if we look at the training data
-% Ndet is driven by sample size
+% is Ndet driven by sample size
 p = ranksum(featuresFullData.minDetectTrain(:,1), featuresFullData.minDetectTrainMax);
 if(p < .05)
     fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that NdetTrain of regressiosn 1 is the same as NdetTrainMax\n', 100*p);
@@ -686,7 +721,7 @@ else
     fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence that NdetTrain of regressiosn 1 is the same as NdetTrainMax\n', 100*p);
 end
 
-% Test specificity is driven by sample size
+% Is training specificity is driven by sample size
 p = ranksum(featuresFullData.fpMinDetectTrain(:,1), featuresFullData.fpTrainMin);
 if(p < .05)
     fprintf(fid, 'Reject null hypothesis with p=%.2f%% confidence that fpTrain of regressiosn 1 is the same as fpTrainMin\n', 100*p);
@@ -694,7 +729,7 @@ else
     fprintf(fid, 'Fail to reject null hypothesis with p=%.2f%% confidence fpTrain of regressiosn 1 is the same as fpTrainMin\n', 100*p);
 end
 
-% Ndet is driven by sample size
+% Ndet training is driven by sample size
 p = kruskalwallis([featuresFullData.minDetectTrain(:,1:4)- featuresFullData.minDetectTrainMax.'*ones(1,4)], [], 'off')
 p = kruskalwallis([featuresFullData.minDetectTrain(:,1:4) featuresFullData.minDetectTrainMax.'], [], 'off');
 if(p < .05)
