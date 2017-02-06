@@ -218,7 +218,7 @@ featuresFullData.regressionNames = regexprep(featuresFullData.regressionNames, '
 featuresFullData.regressionNames = regexprep(featuresFullData.regressionNames, '.radius_invm', ' < r_f > ');
 
 %%
-bLannin = isfield(featuresFullData, 'AUCTestLannin') && 0;
+bLannin = isfield(featuresFullData, 'AUCTestLannin') && 1;
 
 if bLannin
     figSize = [.25, 2, 6.5/2, 4.25];
