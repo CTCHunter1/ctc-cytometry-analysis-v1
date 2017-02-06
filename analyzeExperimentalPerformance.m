@@ -46,6 +46,7 @@ bUsePooledRegs = 1; % 0 for a different regression (set) for each of the trainin
 % 1 for using 1 regression (set) for all the data, if set to 1
 % the path below path will be used to find those regs
 regPathPooled = ['day9-15merge', fsepchar, 'Reg Mats'];
+bSwapTrainTest = 0; % 0 small train big test (normal), 1 big train small test 
 
 Ndays = length(daysToProcess);
 
