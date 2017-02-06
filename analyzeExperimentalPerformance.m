@@ -26,6 +26,7 @@ daysToProcess = {'day5', 'day7',};
 daysToProcess = {'day9', 'day10', 'day12', 'day13', ...
     'day14', 'day15'};
 
+daysToProcess = {'day9-15merge'};
 
 % this function also does the loading and merging
 
