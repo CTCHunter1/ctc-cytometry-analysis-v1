@@ -302,10 +302,25 @@ axh(ii) = axes('position', [ao, aob+ ((ii-1)/numFieldNamesForPlot)*ahscale, aw, 
                 set(axh(ii), 'Ylim', yLim);
                 yTick = [.035, .04, .045, .05];
                 set(axh(ii), 'YTick', norminv(yTick));
+                
+             case {'AUC', 'AUCTest'}
+%                 yLim = [.098, 4.1];
+%                 set(axh(ii), 'Ylim', yLim);
+                 yTick = [1, 2, 3, 4];
+%                 set(axh(ii), 'YTick', yTick);
         end 
         
         yTicks = get(axh(ii), 'YTick');
-        yTickLabels = sprintfc('%.3f', normcdf(yTicks));
+        
+        % we 1.0 never exists, avoid writing it, 
+        if sum(round(normcdf(yTicks), 3) == 1) >= 1
+            yTickLabels = sprintfc('%.4f', normcdf(yTicks));
+            if sum(round(normcdf(yTicks), 4) == 1) >= 1
+                yTickLabels = sprintfc('%.5f', normcdf(yTicks));
+            end
+        else
+            yTickLabels = sprintfc('%.3f', normcdf(yTicks));
+        end
        %yTickLabels = cellfun(@num2str, yTickLabels);        
        xLim = get(axh(ii), 'Xlim');   
         yLim = get(axh(ii), 'Ylim');
