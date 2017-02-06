@@ -93,6 +93,9 @@ FeatStat.fpTrainROC = cell(1, Nregressions);
 FeatStat.sensTestROC = cell(1, Nregressions);
 FeatStat.fpTestROC = cell(1, Nregressions);
 FeatStat.AUCTest = zeros(1, Nregressions);
+FeatStat.AUCTestLannin = zeros(1, Nregressions); % AUC upto FPR of .05 
+% as decribed by Lannin, et. al, http://dx.doi.org/10.1002/cyto.a.22993
+lanninAUCFPCut = .05; % just to make it a variable rather than hard code
 
 FeatStat.fpMinDetectTest = zeros(1, Nregressions);
 FeatStat.sensMinDetectTest = zeros(1, Nregressions);
@@ -165,6 +168,9 @@ for ii = 1:Nregressions
     [fpTest, sensTest, ~, FeatStat.AUCTest(ii)] = compute_ROC(dpTestScored,...
         dnTestScored);
     
+    ind = fpTest < lanninAUCFPCut;
+    
+    FeatStat.AUCTestLannin(ii) = trapz(fpTest(ind), sensTest(ind));
     
     uptrain = mean(dpScored);
     untrain = mean(dnScored);    
