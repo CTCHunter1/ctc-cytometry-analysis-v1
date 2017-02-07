@@ -73,6 +73,10 @@ for ii=1:length(regressionNames)
         set(gca, 'Ylim', [0, yLim(2)*1.3]);
     end
     
+    yTicks = get(gca, 'YTick');
+    yTickLabels = sprintfc('%.0f', yTicks);
+    set(gca, 'YTickLabel', yTickLabels);
+    
     if exist('thresholds', 'var') == 1
         currentPost = get(gca, 'position');
         axes('position', currentPost);    
