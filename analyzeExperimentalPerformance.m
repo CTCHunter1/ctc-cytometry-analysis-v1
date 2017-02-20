@@ -1,4 +1,4 @@
-% Copyright (C) 2016  Gregory L. Futia
+% Copyright (C) 2016, 2017  Gregory L. Futia
 % This work is licensed under a Creative Commons Attribution 4.0 International License.
 
 % Description: Iterates throug the days of data. Data is split into 
