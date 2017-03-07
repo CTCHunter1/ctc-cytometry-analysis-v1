@@ -1,0 +1,249 @@
+% Created By: Greg Futia
+% Created On:
+% Last Edited: Sept. 14th, 2015
+
+
+%%%%%%%%%%%%%%%%%%%%%%% preamble %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentclass[journal, draftcls]{IEEEtran}  % double space
+\documentclass[journal]{IEEEtran}
+%\usepackage{fixltx2e}
+\usepackage{amssymb, amsmath, subfig, color, fancybox}
+\usepackage[]{graphicx}
+%\usepackage{stfloats}
+\usepackage{epstopdf}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+
+%\DeclareMathSizes{10}{8}{*}{*}
+%\displaystyle 8
+
+\usepackage{url}  % helps hyperlinks
+% Configure the linking of references and citations
+% hypertex for stright dvi, pdftex for stright PDf
+\usepackage[hypertex, colorlinks=true, linkcolor=red, citecolor=blue, urlcolor=blue, linktoc=page]{hyperref}
+\usepackage[noadjust]{cite}   % for Bibtex - needs to be after hyperref
+%\usepackage[dvipdfm]{media9}
+
+
+\usepackage{ae} %%for Computer Modern fonts; % fixes fonts not being found in yap
+
+
+%%%%%%%%%%%%%%%%%%%%%%% begin %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+
+
+%%%%%%%%%%%%%%%%%% title page information %%%%%%%%%%%%%%%%%%
+\title{Regressed Equations Trained on All Data}
+
+%\author{Gregory L. Futia$^*$,~\IEEEmembership{Member,~IEEE,} Lubna Qamar, Kian Behbakht, and Emily A. Gibson
+%\author{Gregory L. Futia, Lubna Qamar, Kian Behbakht, and Emily A. Gibson
+%\thanks{Manuscript received \today; revised TBD}
+%\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem $^*$ G. Futia and E. Gibson are with the Department of Bioengineering, University of Colorado Denver | Anschutz Medical Campus, Aurora, Co. 80045. (e-mail: gregory.futia@ucdenver.edu)
+%\IEEEcompsocthanksitem K. Behbakht and L. Qamar are with the Department Obstetrics and Gynecology, Division of Gynecologic Oncology University of Colorado Denver | Anschutz Medical Campus, Aurora, Co. 80045. (e-mail: kian.behbakt@ucdenver.edu)}%
+%}
+
+
+\newcommand{\EQN}[0]{Eq. }
+\newcommand{\FIG}[0]{Fig. }
+\newcommand{\SEC}[0]{Sec. }
+\newcommand{\TAB}[0]{Table }
+\newcommand{\APX}[0]{Appendix }
+\newcommand{\note}[1]{{\bf[#1]}}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\newcommand{\tablefont}[1]{\fontsize{#1}{#1}\selectfont}
+\newcommand{\UL}[0]{$\rm \mu L$}
+\newcommand{\UM}[0]{$\rm \mu m$}
+
+% \homepage{http:...} %% author's URL, if desired
+
+%%%%%%%%%%%%%%%%%%% abstract and OCIS codes %%%%%%%%%%%%%%%%
+%% [use \begin{abstract*}...\end{abstract*} if exempt from copyright]
+
+
+\maketitle
+
+%\begin{abstract}
+
+
+%\end{abstract}
+
+%\ocis{(000.0000) General.} % REPLACE WITH CORRECT OCIS CODES FOR YOUR ARTICLE
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%  body  %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\subsection{Multivariate Analysis and Regression}
+
+
+The regressions trained with all data.
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{Reg1_{all}.tex} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG1_DNA_BD}
+\end{aligned}
+\end{gather}
+
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{Reg2_{Sigma}.tex} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG2_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{"Reg3_{DAPI + CD45 + PanCK}.tex"} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG3_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{"Reg4_{DAPI + Bodipy + CD45}.tex"} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG5_DNA_BD}
+\end{aligned}
+\end{gather}
+
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{"Reg5_{DAPI + CD45}.tex"} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG5_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{"Reg6_{DAPI + PanCK}.tex"} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG6_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{"Reg7_{DAPI + Bodipy}.tex"} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG6_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{Reg8_{DAPI}.tex} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG6_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{Reg9_{Bodipy}.tex} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG6_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{Reg10_{CD45}.tex} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG6_DNA_BD}
+\end{aligned}
+\end{gather}
+
+\begin{gather}
+%\tablefont{9pt}
+\begin{aligned}
+\input{Reg11_{PanCK}.tex} , % this file is generated in matlab.. this ensures that the metrics are up to date
+\label{Eqn: REG6_DNA_BD}
+\end{aligned}
+\end{gather}
+
+%%%%%%%%%%%%%%%%%%%%%%% References %%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{thebibliography}{1}
+%\bibitem{gallo99} K. Gallo and G. Assanto, ``All-optical diode based on second-harmonic generation in an asymmetric waveguide,'' \josab {\bf 16,} 267--269 (1999).
+
+%\bibliographystyle{IEEEtran}
+%\bibliography{references_bib}
+%
+%\begin{figure}[h]
+%    \begin{centering}
+%    \subfloat{
+%    \includegraphics[]{Graphics/RegressionRoc.eps}
+%    }
+%    \subfloat{
+%    \includegraphics[]{Graphics/DistFitGauss.eps}
+%    }
+%    \caption[]{The dashed red and blue lines are the fitted gaussians used to create the fitted ROC curve of \FIG \ref{fig: Regression ROC Curves}. Clearly they don't fit the distributions that well but when the curves represent the distribution better the ROC curve runs significantly higher than what it should be.
+%    \label{fig: Regression ROC Curves Fit Guass}}
+%    \end{centering}
+%\end{figure}
+%
+%
+%\begin{figure}[h]
+%    \begin{centering}
+%    \subfloat{
+%    \includegraphics[]{Graphics/RegressionRocGaussLin.eps}
+%    }
+%    \subfloat{
+%    \includegraphics[]{Graphics/DistFitGaussLin.eps}
+%    }
+%    \caption[]{Here is doing a linear fit to the Gaussian. The fit curves look good but the ROC curve is way better than that of the origional data. You can see the roll off is steeper than the origional data particularly on the log scale.
+%    \label{fig: Regression ROC Curves Fit GuassLin}}
+%    \end{centering}
+%\end{figure}
+%
+%\begin{figure}[h]
+%    \begin{centering}
+%    \subfloat{
+%    \includegraphics[]{Graphics/RegressionRocLorentz.eps}
+%    }
+%    \subfloat{
+%    \includegraphics[]{Graphics/DistFitLorentz.eps}
+%    }
+%    \caption[]{Here is fitting the curves to a Lorentzian function instead of a Gaussian. The lorentzian has must slower roll off meaning the tails of the distributions don't go to zero (nearly) as rapdily.
+%    \label{fig: Regression ROC Curves Fit Lorentz}}
+%    \end{centering}
+%\end{figure}
+
+%\end{thebibliography}
+
+%\begin{IEEEbiography}{Gregory L. Futia}
+%earned his M.S. degree in Electrical Engineering from Colorado State University in 2011 working with Dr. Bartels with thesis on theory and implementation of spatial frequency modulated imaging. He earned is B.S. degree in Electrical Engineering from Purdue University in 2007.
+%
+%Since 2011, he has been a PhD student in Bioengineering at the University of Colorado | Anschutz Medical Campus. His research is focused on the exploration of new biomarkers for CTCs. He is particularly interested in optical methods for CTC detection and isolation.
+%\end{IEEEbiography}
+%
+%
+%\begin{IEEEbiography}{Lubna Qamar}
+%
+%\end{IEEEbiography}
+%
+%\begin{IEEEbiography}{Kian Behbakht}
+%is a processor of gynecologic Oncology and Reproductive Science, adjunct professor in Pharmacology, as well as a practicing clinical gynecologic oncologist at the University of Colorado Denver | Anschutz Medical Campus and University of Colorado Hospital.
+%
+%He is interested in the pathogenesis of ovarian cancer and the epidemiology of cervical cancer. His clinical interests are endoscopic and fertility preserving procedures in gynecologic cancer.
+%\end{IEEEbiography}
+%
+%\begin{IEEEbiography}{Emily A. Gibson}
+%is a assistant professor of Bioengineering at the University of Colorado Denver | Anschutz Medical Campus. She earned her PhD in physics from the the University of Colorado Boulder in 2007 with research optical generation of soft x-rays.
+%
+%One area of her research is the development of new diagnostic tools by integrating microfluidic devices with laser spectroscopy for high throughput analysis and sorting biological samples. Her research is focused on applying optical techniques to improve early cancer detection and treatment of diabetes, among other medical applications.
+%\end{IEEEbiography}
+
+
+\end{document}
