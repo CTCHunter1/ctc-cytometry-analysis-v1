@@ -13,7 +13,7 @@ daysToProcess = {'day5', 'day7',};
 daysToProcess = {'day9', 'day10', 'day12', 'day13', ...
     'day14', 'day15'};
 
-
+%daysToProcess = {'day9-15merge'};
 
 % for each day there are two folders. One of pure MCF7 data and one of pure
 % WBC data. For each pairing of this data, compute cohen's D, and and ROC
@@ -343,6 +343,11 @@ for ii = 1:length(channelNames)
         a.FontSize = 11;
         a.EdgeColor = 'none';
         
+        if exist([mainPath, filesep, 'VariationHist'], 'dir') == 0
+            mkdir([mainPath, filesep, 'VariationHist']);
+        end
+        
         saveas(gcf, [mainPath, filesep, 'VariationHist', filesep, channelNames{ii}, '_', features{jj} '.png'], 'png');
+    
     end    
 end
