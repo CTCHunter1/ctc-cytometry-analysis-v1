@@ -53,7 +53,7 @@ for ii = 1:Nfields
             % for these variables we also want to create a label variable
             % for the day the data came from and the technical varient
             % - these labels will allow us to use an ANOVA to determine if
-            % between our within group variances are dominate
+            % between our within group variances are dominat
             switch fieldNames{ii}
                 case { 'dpTrainScored', 'dnTrainScored', 'dpTestScored', 'dnTestScored'}
                     bLabelVar = 1; % 0, don't create a label variable, 1 create
@@ -100,7 +100,8 @@ for ii = 1:Nfields
                     accum = accum + NROC;
                 end
             end
-        case {'minDetectTestMax', 'fpTestMin', 'minDetectTrainMax', 'fpTrainMin'}
+        case {'minDetectTestMax', 'fpTestMin', 'minDetectTrainMax', 'fpTrainMin', ...
+               'NDnTest', 'NDnTrain', 'NDpTest', 'NDpTrain'}
             featuresFullData.(fieldNames{ii}) = zeros(1, Nvariants);
             for kk=1:Nvariants
                 featuresFullData.(fieldNames{ii})(kk) = featuresMinDet{kk}.(fieldNames{ii});

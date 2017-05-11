@@ -58,8 +58,20 @@ FeatStat.dnTestScored = cell(1, Nregressions);
 SNR = 2;
 FeatStat.SNR = SNR;
 NDnTest = sum(DNApDntest);
+NDnTrain = sum(DNAp);
+NDpTest = sum(DNApDptest);
+NDpTrain = sum(DNApMCF7);
+
 FeatStat.minDetectTestMax = (1+SNR*NDnTest.^-1)./(SNR*NDnTest.^-1);
-FeatStat.fpTestMin = NDnTest.^-1;
+FeatStat.minDetectTrainMax = (1+SNR*NDnTrain.^-1)./(SNR*NDnTrain.^-1);
+
+FeatStat.fpTestMin = 1./NDnTest;
+FeatStat.fpTrainMin = 1./NDnTrain;
+
+FeatStat.NDnTest = NDnTest;
+FeatStat.NDnTrain = NDnTrain;
+FeatStat.NDpTest = NDpTest;
+FeatStat.NDpTrain = NDpTrain;
 
 zspace = linspace(-5, 5);
 fp_no_use = normcdf(zspace);
@@ -70,10 +82,7 @@ ii = 1;
 for kk = 1:length(channelNames)
     jj = reorder(kk);
     %jj = kk;
-    for ll = 1:4
-    
-    FeatStat.regressionNames = [channelNames{jj} '.' features{ll}];    
-        
+    for ll = 1:4       
     [fp, sens, T, FeatStat.AUC(ii)] = compute_ROC(Dp.Channels.(channelNames{jj}).(features{ll})(DNApMCF7),...
         Dn.Channels.(channelNames{jj}).(features{ll})(DNAp));
     

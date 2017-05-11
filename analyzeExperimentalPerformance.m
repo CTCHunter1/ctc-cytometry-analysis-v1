@@ -281,6 +281,9 @@ save([mainPath, fsepchar, 'regStatsAll.mat'], 'regStatsAll', 'featStatsAllName')
 featFullData = createStatsTabAndPlots2(featStatsAll, [mainPath, fsepchar], 'feature', featStatsAllName);
 regFullData = createStatsTabAndPlots2(regStatsAll, [mainPath, fsepchar], 'regression', featStatsAllName);
 
+save([mainPath, fsepchar, 'featStatsFullData.mat'], 'featFullData');
+save([mainPath, fsepchar, 'regStatsFullData.mat'], 'regFullData');
+
 figure(6);  
 clf;
 create_manuscript_histograms(Dp, Dn, Dmix, featFullData, DNACutoff, [mainPath, fsepchar]);
