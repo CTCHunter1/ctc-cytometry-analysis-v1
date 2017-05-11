@@ -23,8 +23,8 @@ end
 
 
 % Set the DNA Gates
-DNApWBC = Dn.Channels.DAPI.totalSig_dBc > DNACutOff; % WBCs are diesease negative
-DNApMCF7 = Dp.Channels.DAPI.totalSig_dBc > DNACutOff;% MCF7s are disease positive
+DNApWBC = Dn.Channels.DAPI.totalSig_dBc > DNACutOff;  % WBCs are diesease negative
+DNApMCF7 = Dp.Channels.DAPI.totalSig_dBc > DNACutOff; % MCF7s are disease positive
 DNApMix = Mixed.Channels.DAPI.totalSig_dBc > DNACutOff;
 
 colorNames = {'g', 'y', 'b', 'r'};

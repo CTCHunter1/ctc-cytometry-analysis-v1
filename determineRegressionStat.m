@@ -122,12 +122,21 @@ end
 SNR = 2;
 FeatStat.SNR = SNR;
 NDnTest = sum(DNApDntest);
+NDnTrain = sum(DNAp);
+NDpTest = sum(DNApDptest);
+NDpTrain = sum(DNApMCF7);
 FeatStat.minDetectTestMax = (1+SNR*NDnTest.^-1)./(SNR*NDnTest.^-1);
 FeatStat.fpTestMin = NDnTest.^-1;
 
 NDnTrain = sum(DNAp);
+FeatStat.fpTestMin = 1./NDnTest;
 FeatStat.fpTrainMin = NDnTrain.^-1;
 FeatStat.minDetectTrainMax = (1+SNR*NDnTrain.^-1)./(SNR*NDnTrain.^-1);
+
+FeatStat.NDnTest = NDnTest;
+FeatStat.NDnTrain = NDnTrain;
+FeatStat.NDpTest = NDpTest;
+FeatStat.NDpTrain = NDpTrain;
 
 zspace = linspace(-5, 5);
 fp_no_use = normcdf(zspace);

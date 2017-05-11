@@ -50,7 +50,7 @@ bSwapTrainTest = 0; % 0 small train big test (normal), 1 big train small test
 
 Ndays = length(daysToProcess);
 
-
+% one cell for each day of data
 WBCDataAll = cell(1, Ndays);
 MCF7DataAll = cell(1, Ndays);
 MixDataAll = cell(1, Ndays);
@@ -280,6 +280,9 @@ save([mainPath, fsepchar, 'featStatsAll.mat'], 'featStatsAll', 'featStatsAllName
 save([mainPath, fsepchar, 'regStatsAll.mat'], 'regStatsAll', 'featStatsAllName');
 featFullData = createStatsTabAndPlots2(featStatsAll, [mainPath, fsepchar], 'feature', featStatsAllName);
 regFullData = createStatsTabAndPlots2(regStatsAll, [mainPath, fsepchar], 'regression', featStatsAllName);
+
+save([mainPath, fsepchar, 'featStatsFullData.mat'], 'featFullData');
+save([mainPath, fsepchar, 'regStatsFullData.mat'], 'regFullData');
 
 figure(6);  
 clf;

@@ -18,36 +18,60 @@ DNApDptest = Dptest.Channels.DAPI.totalSig_dBc > DNACutOff;
 DNApDntest = Dntest.Channels.DAPI.totalSig_dBc > DNACutOff;
 
 channelNames = fieldnames(Dp.Channels);
+reorder = [3, 1, 4, 2]; % reorder the channel names
+
 features = {'totalSig_dBc', 'radius_m', 'radius_invm', 'M2'};
-reorder = [3, 1, 4, 2];
+
 
 % initialize the performance variables
+% they aren't 'regressions' but feature nemes here
+% this is for compatiblity with determineRegStat
 regressionNames = cell(1, length(channelNames)*length(features));
+Nregressions = length(regressionNames); 
 FeatStat.regressionNames = regressionNames;
-FeatStat.TMinDetect = zeros(1, length(regressionNames));
+FeatStat.TMinDetect = zeros(1, Nregressions);
 % these will be set using the test data
-FeatStat.fpMinDetectTrain = zeros(1, length(regressionNames));
-FeatStat.sensMinDetectTrain = zeros(1, length(regressionNames));
-FeatStat.minDetectTrain = zeros(1, length(regressionNames));
+FeatStat.fpMinDetectTrain = zeros(1, Nregressions);
+FeatStat.sensMinDetectTrain = zeros(1, Nregressions);
+FeatStat.minDetectTrain = zeros(1, Nregressions);
 % new to create ROC histograms
-FeatStat.sensTrainROC = cell(1, length(regressionNames));
-FeatStat.fpTrainROC = cell(1, length(regressionNames));
+FeatStat.sensTrainROC = cell(1, Nregressions);
+FeatStat.fpTrainROC = cell(1, Nregressions);
 
 
-FeatStat.fpMinDetectTest = zeros(1, length(regressionNames));
-FeatStat.sensMinDetectTest = zeros(1, length(regressionNames));
-FeatStat.minDetectTest = zeros(1, length(regressionNames));
-FeatStat.bFpIsZero = zeros(1, length(regressionNames)); % 1 for is zero 
-FeatStat.bFpTrainIsZero = zeros(1, length(regressionNames)); % 1 for is zero 
+FeatStat.fpMinDetectTest = zeros(1, Nregressions);
+FeatStat.sensMinDetectTest = zeros(1, Nregressions);
+FeatStat.minDetectTest = zeros(1, Nregressions);
+FeatStat.bFpIsZero = zeros(1, Nregressions); % 1 for is zero 
+FeatStat.bFpTrainIsZero = zeros(1, Nregressions); % 1 for is zero 
 
 FeatStat.AUC = zeros(1, length(regressionNames));
 FeatStat.d_cohen = zeros(1, length(regressionNames));
 
+
+% we'ere going to keep the raw data for anovas later
+FeatStat.dpTrainScored = cell(1, Nregressions);
+FeatStat.dnTrainScored = cell(1, Nregressions);
+FeatStat.dpTestScored = cell(1, Nregressions);
+FeatStat.dnTestScored = cell(1, Nregressions);
+
 SNR = 2;
 FeatStat.SNR = SNR;
 NDnTest = sum(DNApDntest);
+NDnTrain = sum(DNAp);
+NDpTest = sum(DNApDptest);
+NDpTrain = sum(DNApMCF7);
+
 FeatStat.minDetectTestMax = (1+SNR*NDnTest.^-1)./(SNR*NDnTest.^-1);
-FeatStat.fpTestMin = NDnTest.^-1;
+FeatStat.minDetectTrainMax = (1+SNR*NDnTrain.^-1)./(SNR*NDnTrain.^-1);
+
+FeatStat.fpTestMin = 1./NDnTest;
+FeatStat.fpTrainMin = 1./NDnTrain;
+
+FeatStat.NDnTest = NDnTest;
+FeatStat.NDnTrain = NDnTrain;
+FeatStat.NDpTest = NDpTest;
+FeatStat.NDpTrain = NDpTrain;
 
 zspace = linspace(-5, 5);
 fp_no_use = normcdf(zspace);
@@ -58,7 +82,7 @@ ii = 1;
 for kk = 1:length(channelNames)
     jj = reorder(kk);
     %jj = kk;
-    for ll = 1:4
+    for ll = 1:4       
     [fp, sens, T, FeatStat.AUC(ii)] = compute_ROC(Dp.Channels.(channelNames{jj}).(features{ll})(DNApMCF7),...
         Dn.Channels.(channelNames{jj}).(features{ll})(DNAp));
     
@@ -87,6 +111,12 @@ for kk = 1:length(channelNames)
     FeatStat.sensTrainROC{ii} = sens;
     FeatStat.fpTrainROC{ii} = fp;
   
+    %save data for later ANOVA analysis
+    FeatStat.dpTrainScored{ii} = Dp.Channels.(channelNames{jj}).(features{ll})(DNApMCF7);
+    FeatStat.dnTrainScored{ii} = Dn.Channels.(channelNames{jj}).(features{ll})(DNAp);
+    FeatStat.dpTestScored{ii} = Dptest.Channels.(channelNames{jj}).(features{ll})(DNApDptest);
+    FeatStat.dnTestScored{ii} = Dntest.Channels.(channelNames{jj}).(features{ll})(DNApDntest);
+    
     % is the mean of disease positive more or less than disease negative
     if uptrain > untrain
         % diease positive is to right of disease negative
