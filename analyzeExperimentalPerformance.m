@@ -26,7 +26,7 @@ daysToProcess = {'day5', 'day7',};
 daysToProcess = {'day9', 'day10', 'day12', 'day13', ...
     'day14', 'day15'};
 
-daysToProcess = {'day9-15merge'};
+% daysToProcess = {'day9-15merge'};
 
 % this function also does the loading and merging
 
@@ -42,7 +42,7 @@ DNACutoff = 65;
 % load the regressions form files
 % otherwise compute them
 bLoad = 1; % 0 for compute; 1 for load. Running code in compute can take days.
-bUsePooledRegs = 1; % 0 for a different regression (set) for each of the training testing pairings
+bUsePooledRegs = 0; % 0 for a different regression (set) for each of the training testing pairings
 % 1 for using 1 regression (set) for all the data, if set to 1
 % the path below path will be used to find those regs
 regPathPooled = ['day9-15merge', fsepchar, 'Reg Mats'];
