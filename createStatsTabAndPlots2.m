@@ -218,10 +218,11 @@ if exist('featLabels', 'var') == 1
                  featuresFullData.sensTrainROCAvg{ii}(jj*NptsPerROC+[1:NptsPerROC]);
             featuresFullData.fpTrainROCAvgMatrix{ii}(jj, :) = ...
                  featuresFullData.fpTrainROCAvg{ii}(jj*NptsPerROC+[1:NptsPerROC]);
-            featuresFullData.fpMinDetectTrainGroupedAvg{ii}{jj} = ...
-                mean(featuresFullData.fpMinDetectTrainGrouped{ii}{jj}); 
-            featuresFullData.sensMinDetectTrainGroupedAvg{ii}{jj} = ...
-                mean(featuresFullData.sensMinDetectTrainGrouped{ii}{jj}); 
+            % Operating Points
+            [featuresFullData.fpMinDetectTrainGroupedAvg{ii}{jj}, ...
+                featuresFullData.sensMinDetectTrainGroupedAvg{ii}{jj}] = ...
+                averageSensSpec(featuresFullData.fpMinDetectTrainGrouped{ii}{jj},  ...
+                    featuresFullData.sensMinDetectTrainGrouped{ii}{jj}, 0); 
              
              
             if isfield(featuresMinDet{1}, 'sensTestROC')
@@ -232,10 +233,11 @@ if exist('featLabels', 'var') == 1
                 featuresFullData.sensTestROCAvg{ii}(jj*NptsPerROC+[1:NptsPerROC]);
             featuresFullData.fpTestROCAvgMatrix{ii}(jj, :) =  ...
                 featuresFullData.fpTestROCAvg{ii}(jj*NptsPerROC+[1:NptsPerROC]);
-            featuresFullData.fpMinDetectTestGroupedAvg{ii}{jj} = ...
-                mean(featuresFullData.fpMinDetectTestGrouped{ii}{jj}); 
-            featuresFullData.sensMinDetectTestGroupedAvg{ii}{jj} = ...
-                mean(featuresFullData.sensMinDetectTestGrouped{ii}{jj}); 
+            % Operating Points
+            [featuresFullData.fpMinDetectTestGroupedAvg{ii}{jj}, ...
+                featuresFullData.sensMinDetectTestGroupedAvg{ii}{jj}] = ...
+                averageSensSpec(featuresFullData.fpMinDetectTestGrouped{ii}{jj}, ... 
+                    featuresFullData.sensMinDetectTestGrouped{ii}{jj}, 0); 
             end
         end
     end
@@ -736,9 +738,206 @@ if isfield(featuresFullData, 'dpTestScored') && ...
     saveas(gcf, [pathname, filenameprefix, 'HistogramsTest', '.emf'], 'emf');      
 end
 
+% create ROC on likelihood ratio axis
+% similar to z-scored ROC
+% this is a bifold size plot
+% height is configured by number of regressions
+% origionally designe for 16
+% we need to build in a offset for the axis labels to 
+% dynamically configure the height
+Nvert = ceil(Nregressions/2);
+figSize = [.25, 2, 6.5/2, (7.25/8)*Nvert+.75];
 
-bPeformStatTest = 1;
+%%
+figure(7);
+clf;
+set(gcf, 'Units', 'Inches');
+set(gcf, 'Position', figSize);
+set(gcf, 'PaperUnits', 'Inches');
+set(gcf, 'PaperPosition', figSize);
 
+set(0, 'defaultTextFontSize', 7);
+set(0, 'defaultAxesFontSize', 7);
+
+axh = zeros(1, Nregressions);
+
+% parameters for drawing the axes
+ao = .12;
+aob = .06;
+aw = .4;
+ah = .105;
+ahscale = .87;
+avscale = .83;
+if Nregressions ==  16
+    avspace = .007;
+    ah = .102;
+    aob = .09;
+else
+   avspace = 0;
+   ah = .13;
+   aob = .105;
+end
+    
+LRTPMin = -.2;
+LRTPMax = 3.5;
+LRTNMin = -.2;
+LRTNMax = 3.5;
+
+zspace = linspace(aucZmin, aucZmax);
+fp_no_use = normcdf(zspace);
+sens_no_use = fp_no_use;
+
+aucColormap = load('DensityPlotColorMapGray.mat');
+thresholdMap = load('DensityPlotColorMapWhiteToRed.mat');
+%8x2 figure
+% two loops first loop is vertical, second loop is horizontal
+% Nvert = NvertPan;
+Nhorz = 2;
+regIndex = 1;
+
+ticks = [.00001, .0003, .005, .05, .2, .5, .8, .95, .995, .9997, .99999];
+tickLabel = cell(1, length(ticks));
+for ii = 1:length(ticks);
+    tickLabel{ii} = num2str(ticks(ii));
+end
+
+% use cloud plot or just overlay the plots
+bCloudPlot = 0; % 1 use cloud plot, 0 overlay plots
+
+switch filenameprefix
+    case 'regression'
+       fpFieldName = 'fpTestROC';
+       sensFieldName = 'sensTestROC';
+       threshFPFieldName = 'fpMinDetectTest';
+       threshSensFieldName = 'sensMinDetectTest';
+    case 'feature'
+       fpFieldName = 'fpTrainROC';
+       sensFieldName = 'sensTrainROC';
+       threshFPFieldName = 'fpMinDetectTrain';
+       threshSensFieldName = 'sensMinDetectTrain';       
+end
+
+% change between using averages or all data
+if isfield(featuresFullData, 'fpTrainROCAvg')
+    if bCloudPlot
+        fpFieldName = [fpFieldName, 'Avg'];
+        sensFieldName = [sensFieldName, 'Avg'];
+    else
+        fpFieldName = [fpFieldName, 'AvgMatrix'];
+        sensFieldName = [sensFieldName, 'AvgMatrix'];
+%         threshFPFieldName = [threshFPFieldName, 'Grouped'];
+%         threshSensFieldName = [threshSensFieldName, 'Grouped'];
+        threshFPFieldName = [threshFPFieldName, 'GroupedAvg'];
+        threshSensFieldName = [threshSensFieldName, 'GroupedAvg'];
+    end
+end
+
+% change loop direction to start at top instead of bottom
+for ii=Nvert:-1:1
+    for jj = 1:2
+        % as we move between channels put a little bit of space
+        % with the avspace parts of this
+        axh(regIndex) = axes('position', [ao + ((jj-1)/Nhorz)*avscale, aob+ ((ii-1)/Nvert)*ahscale+avspace*(round((ii)/2)-1), aw, ah]);   
+        %cloudPlot(norminv(featuresFullData.fpTrainROC{regIndex}), norminv(featuresFullData.sensTrainROC{regIndex}), [aucZmin aucZmax, aucZmin aucZmax], 0, [100, 100], aucColormap.map);
+        
+                    
+        [LRTpFeat, LRTnFeat] = sensSpec2Likelihood(featuresFullData.(sensFieldName){regIndex}, ...
+            1-featuresFullData.(fpFieldName){regIndex}, 1);
+            
+        if bCloudPlot || ~exist('identifiers', 'var')            
+            cloudPlot({-log10(LRTnFeat), -log10(LRTnThresh)}, ...
+                {log10(LRTpFeat),log10(LRTpThresh)}, ([LRTNMin, LRTNMax, LRTPMin, LRTPMax]), 0, [200, 200], {aucColormap.map, thresholdMap.map}, {[0, 1], [0, 1]});
+            hold on;
+            [LRTpThresh, LRTnThresh] = sensSpec2Likelihood(featuresFullData.(threshSensFieldName)(:, regIndex), ...
+                1-featuresFullData.(threshFPFieldName)(:, regIndex), 1);
+            plot(-log10(LRTnThresh), ...
+                 log10(LRTpThresh), 'r+', 'MarkerSize', 2);
+            
+        else
+            plot(-log10(LRTnFeat.'), log10(LRTpFeat.'));
+            % // reset the color index
+            hold on;
+            ax = gca;
+            ax.ColorOrderIndex = 1;
+            % plot the operating points
+            %plot(norminv(featuresFullData.(threshFPFieldName)(:, regIndex)).', ...
+                %norminv(featuresFullData.(threshSensFieldName)(:, regIndex)).', '+', 'MarkerSize', 2);
+            for kk = 1:Nidentifiers
+                [LRTpThresh, LRTnThresh] = sensSpec2Likelihood(featuresFullData.(threshSensFieldName){regIndex}{kk}, ...
+                    1-featuresFullData.(threshFPFieldName){regIndex}{kk}, 1);
+                plot(-log10(LRTnThresh), log10(LRTpThresh), '+', 'MarkerSize', 4);
+            end
+            set(ax, 'Xlim', [LRTNMin, LRTNMax]);
+            set(ax, 'Ylim', [LRTPMin, LRTPMax]);
+        end
+        
+%         plot(norminv(fp_no_use), norminv(sens_no_use), 'k--');
+%         set(axh(regIndex), 'XTick', ticksZ);
+%         set(axh(regIndex), 'YTick', ticksZ);
+          xTicks = get(axh(regIndex), 'XTick');
+          for kk = 1:length(xTicks);
+            xtickLabel{kk} = ['10^{', num2str((-xTicks(kk))), '}'];
+          end
+
+          yTicks = get(axh(regIndex), 'YTick');
+          for kk = 1:length(yTicks);
+            ytickLabel{kk} = ['10^{', num2str(yTicks(kk)), '}'];
+          end
+          
+          set(axh(regIndex), 'XTickLabel', xtickLabel);
+          set(axh(regIndex), 'YTickLabel', ytickLabel);
+        
+        
+        if jj == 1
+            hl = ylabel('LR_{T+}'); 
+            set(hl, 'Units', 'normalized');
+            % hl is in data units
+            % shift it up slightly
+            pos = get(hl, 'Position');
+            set(hl, 'Position', [pos(1)+.02, pos(2), pos(3)]);
+        else
+            set(axh(regIndex), 'YTickLabel', {});
+        end
+                
+        % this will work for jagged Nregressiosn too
+        if regIndex < Nregressions - 1
+            set(axh(regIndex), 'XTickLabel', {});
+        else
+            %set(axh(regIndex), 'XTickLabelRotation', 90);
+            hl = xlabel('LR_{T-}');
+            set(hl, 'Units', 'normalized');
+            % hl is in data units
+            % shift it up slightly
+            pos = get(hl, 'Position');
+            set(hl, 'Position', [pos(1), pos(2)+.01, pos(3)]);
+        end
+        
+        % if identifiers exist 
+        % add the legend 
+        if jj==1 && ii==1 && exist('identifiers', 'var')
+            h = columnlegend(3, identifiers, 'Orientation', 'Horizontal', 'Location', 'South');
+            set(h, 'Position', [.15, -.075, .75, .12]);
+        end
+        
+        %colormap(aucColormap.map);
+        title(axh(regIndex), featuresFullData.regressionNames(regIndex), 'Units', 'Normal', 'Position', [.7, .82]); 
+        if regIndex == Nregressions
+            break;
+        else            
+            regIndex = regIndex + 1;       
+        end
+    end
+end
+
+% save the plots
+saveas(gcf, [pathname, filenameprefix, 'LRROCcloud', '.jpeg'], 'jpeg'); 
+saveas(gcf, [pathname, filenameprefix, 'LRROCcloud', '.eps'], 'epsc'); 
+saveas(gcf, [pathname, filenameprefix, 'LRROCcloud', '.png'], 'png'); 
+saveas(gcf, [pathname, filenameprefix, 'LRROCcloud', '.emf'], 'emf');  
+
+% whether or not to excute the anova testing
+bPeformStatTest = 0;
+%%
 if strcmp(filenameprefix, 'regression') && bPeformStatTest
     PUT = {'minDetectTest', 'fpMinDetectTest', ...
     'sensMinDetectTest', 'd_cohen', 'AUCTest'};
